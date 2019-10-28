@@ -1,0 +1,6 @@
+Para semana que vem:
+Fazer o mapa
+Personagem andando
+Inimigos andando
+Tiro
+Fazer alguém morrer
