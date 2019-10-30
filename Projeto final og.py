@@ -26,7 +26,7 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
 # Define a aceleração da gravidade
-GRAVITY = 2
+GRAVITY = 1.5
 # Define a velocidade inicial no pulo
 JUMP_SIZE = 20
 # Define a altura do chão
@@ -37,22 +37,24 @@ BLOCK = 0
 EMPTY = -1
 
 # Define o mapa com os tipos de tiles
-MAP = [
+MAP1 = [
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     [EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY],
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     [EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY],
-    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY,EMPTY, BLOCK],
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     [EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY],
-    [BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK],
-    [EMPTY, EMPTY, BLOCK, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, BLOCK, BLOCK, BLOCK],
-    [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
-    [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
+    [BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, EMPTY,EMPTY, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK],
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK],
+    [EMPTY, EMPTY, BLOCK, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK],
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK,BLOCK, BLOCK, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY,EMPTY,],
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK,BLOCK, BLOCK, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY,EMPTY,],
+    [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY,EMPTY, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK]
 ]
 
 # Define estados possíveis do jogador
@@ -62,9 +64,10 @@ FALLING = 2
 
 # Class que representa os blocos do cenário
 class Tile(pygame.sprite.Sprite):
-
+    
     # Construtor da classe.
-    def __init__(self, tile_img, row, column):
+    def __init__(self, row, column):
+
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
         
@@ -86,17 +89,18 @@ class Tile(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self):
+    def __init__(self, row, column, blocks):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
         
         # Carregando a imagem de fundo.
-        player_img = pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_000.png")).convert() # We create the sprite with the default image
+        player_img = pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_000.png")).convert() 
+        # We create the sprite with the default image
         """
         makeSprite
         addSpriteImage(player_img, pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_001.png")))  # Add extra images. They are stored in the Sprite object
-        addSpriteImage(player_img, pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_002.png")))# but not displayed yet
+        addSpriteImage(player_img, pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_002.png")))  # but not displayed yet
         addSpriteImage(player_img, pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_003.png")))
         addSpriteImage(player_img, pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_004.png")))
         addSpriteImage(player_img, pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_005.png")))
@@ -107,7 +111,7 @@ class Player(pygame.sprite.Sprite):
         
         
         # Diminuindo o tamanho da imagem.
-        self.image = pygame.transform.scale(player_img, (50, 38))
+        self.image = pygame.transform.scale(player_img, (40, 38))
         
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
@@ -115,9 +119,12 @@ class Player(pygame.sprite.Sprite):
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
         
+        # Guarda o grupo de blocos para tratar as colisões
+        self.blocks = blocks
+        
         # Centraliza embaixo da tela.
-        self.rect.centerx = WIDTH/10
-        self.rect.bottom = HEIGHT/2 + 100
+        self.rect.x = row * TILE_SIZE - 600
+        self.rect.bottom = column * TILE_SIZE
         
         
         # Velocidade da nave
@@ -126,27 +133,53 @@ class Player(pygame.sprite.Sprite):
         
     # Metodo que atualiza a posição da navinha
     def update(self):
-        self.rect.x += self.speedx
-        
-        # Mantem dentro da tela
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
-        if self.rect.left < 0:
-            self.rect.left = 0
-            
+         # Vamos tratar os movimentos de maneira independente.
+        # Primeiro tentamos andar no eixo y e depois no x.
+
+        # Tenta andar em y
+        # Atualiza a velocidade aplicando a aceleração da gravidade
         self.speedy += GRAVITY
         # Atualiza o estado para caindo
         if self.speedy > 0:
             self.state = FALLING
+        # Atualiza a posição y
         self.rect.y += self.speedy
-        # Se bater no chão, para de cair
-        if self.rect.bottom > GROUND:
-            # Reposiciona para a posição do chão
-            self.rect.bottom = GROUND
-            # Para de cair
-            self.speedy = 0
-            # Atualiza o estado para parado
-            self.state = STILL
+        # Se colidiu com algum bloco, volta para o ponto antes da colisão
+        collisions = pygame.sprite.spritecollide(self, self.blocks, False)
+        # Corrige a posição do personagem para antes da colisão
+        for collision in collisions:
+            # Estava indo para baixo
+            if self.speedy > 0:
+                self.rect.bottom = collision.rect.top
+                # Se colidiu com algo, para de cair
+                self.speedy = 0
+                # Atualiza o estado para parado
+                self.state = STILL
+            # Estava indo para cima
+            elif self.speedy < 0:
+                self.rect.top = collision.rect.bottom
+                # Se colidiu com algo, para de cair
+                self.speedy = 0
+                # Atualiza o estado para parado
+                self.state = STILL
+
+        # Tenta andar em x
+        self.rect.x += self.speedx
+        # Corrige a posição caso tenha passado do tamanho da janela
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right >= WIDTH:
+            self.rect.right = WIDTH - 1
+        # Se colidiu com algum bloco, volta para o ponto antes da colisão
+        collisions = pygame.sprite.spritecollide(self, self.blocks, False)
+        # Corrige a posição do personagem para antes da colisão
+        for collision in collisions:
+            # Estava indo para a direita
+            if self.speedx > 0:
+                self.rect.right = collision.rect.left
+            # Estava indo para a esquerda
+            elif self.speedx < 0:
+                self.rect.left = collision.rect.right
 
     # Método que faz o personagem pular
     def jump(self):
@@ -159,7 +192,7 @@ class Player(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y):
+    def __init__(self, x, y, blocks):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -174,23 +207,35 @@ class Bullet(pygame.sprite.Sprite):
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
         
+        # Guarda o grupo de blocos para tratar as colisões
+        self.blocks = blocks
+        
         # Coloca no lugar inicial definido em x, y do constutor
         self.rect.bottom = y+30
-        self.rect.centerx = x+22
+        self.rect.centerx = x+18
         self.speedy = 20
 
     # Metodo que atualiza a posição da navinha
     def update(self):
         self.rect.x += self.speedy
         
-        # Se o tiro passar do inicio da tela, morre.
-        if self.rect.bottom < 0:
+        # Se o tiro passar do fim da tela, morre.
+        if self.rect.x > 1400 or self.rect.x < 0:
             self.kill()
-
+        
+        # Se colidiu com algum bloco, morre
+        collisions = pygame.sprite.spritecollide(self, self.blocks, False)
+        # Corrige a posição do personagem para antes da colisão
+        if len(collisions) > 0:
+            self.kill()
+            
+        
+        
 
 # Inicialização do Pygame.
 pygame.init()
 pygame.mixer.init()
+
 
 # Tamanho da tela.
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -201,16 +246,24 @@ pygame.display.set_caption("Jack")
 # Variável para o ajuste de velocidade
 clock = pygame.time.Clock()
 
+
+row = len(MAP1)
+column = len(MAP1[0])
 # Carrega o fundo do jogo
 background = pygame.image.load(path.join(img_dir, 'Full Moon - background.png')).convert()
 background_rect = background.get_rect()
+#game_over = pygame.image.load(path.join(img_dir, 'Game-over-2.png')).convert()
 
 # Carrega os sons do jogo
 pygame.mixer.music.load(path.join(snd_dir, 'blackmist II.mp3'))
 pygame.mixer.music.set_volume(0.4)
-#pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'tiro.mp3'))
+pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
+
+# Sprites de block são aqueles que impedem o movimento do jogador
+blocks = pygame.sprite.Group()
+
 # Cria uma nave. O construtor será chamado automaticamente.
-player = Player()
+player = Player(row, column, blocks)
 
 # Cria um grupo para tiros
 bullets = pygame.sprite.Group()
@@ -219,12 +272,20 @@ bullets = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
+# Cria tiles de acordo com o mapa
+for row in range(len(MAP1)):
+    for column in range(len(MAP1[row])):
+        tile_type = MAP1[row][column]
+        if tile_type == BLOCK:
+            tile = Tile(row, column)
+            all_sprites.add(tile)
+            blocks.add(tile)
+
 # Comando para evitar travamentos.
 try:
     
     # Loop principal.
     running = True
-    done = False
     pygame.mixer.music.play(loops=-1)
     while running:
         
@@ -237,10 +298,11 @@ try:
             # Verifica se foi fechado.
             if event.type == pygame.QUIT:
                 running = False
+
             
              # Verifica se foi fechado.
             if event.type == pygame.QUIT:
-                state = done
+                running = False
 
             # Verifica se soltou alguma tecla.
             if event.type == pygame.KEYDOWN:
@@ -257,10 +319,10 @@ try:
                     player.speedx = 5
                 # Se for um espaço atira!
                 if event.key == pygame.K_SPACE:
-                    bullet = Bullet(player.rect.centerx, player.rect.top)
+                    bullet = Bullet(player.rect.centerx, player.rect.top, blocks)
                     all_sprites.add(bullet)
                     bullets.add(bullet)
-                    #pew_sound.play()
+                    pew_sound.play()
             # Verifica se soltou alguma tecla.
             if event.type == pygame.KEYUP:
                 # Dependendo da tecla, altera a velocidade.
@@ -274,6 +336,15 @@ try:
         # Atualiza a acao de cada sprite.
         all_sprites.update()
             
+        # Verifica se caiu da tela
+        if player.rect.y > 700:
+            """
+            game_over_rect = game_over.get_rect()
+            screen.blit(game_over,game_over.get_rect())
+            time.sleep(2)
+            """
+            running = False
+           
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)

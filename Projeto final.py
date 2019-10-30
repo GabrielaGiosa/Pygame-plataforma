@@ -40,6 +40,7 @@ BLOCK = 0
 EMPTY = -1
 
 # Define o mapa com os tipos de tiles
+"""
 MAP = [
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
@@ -57,7 +58,7 @@ MAP = [
     [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
     [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
 ]
-
+"""
 # Define estados possíveis do jogador
 STILL = 0
 JUMPING = 1
@@ -210,49 +211,29 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
             
-# Carrega todos os assets de uma vez.
-def load_assets(imagens):
-    assets = {}
-    assets[PLAYER_IMG] = pygame.image.load(path.join(imagens, 'JK_P_Gun__Idle_000.png')).convert_alpha()
-    assets[BLOCK] = pygame.image.load(path.join(imagens, 'ground2.png')).convert()
-    return assets
+
+# Carrega assets
+assets = load_assets(img_dir)
+
+# Cria um grupo de todos os sprites.
+all_sprites = pygame.sprite.Group()
+# Cria um grupo somente com os sprites de bloco.
+
+# Cria um grupo para tiros
+bullets = pygame.sprite.Group()
+
+# Cria Sprite do jogador
+player = Player(assets[PLAYER_IMG], 12, 2, blocks)
+
+# Adiciona o jogador no grupo de sprites por último para ser desenhado por
+# cima dos blocos
+all_sprites.add(player)
 
 def game_screen(screen):
-    
-    
+     
     # Variável para o ajuste de velocidade
     clock = pygame.time.Clock()
-
-    # Carrega assets
-    assets = load_assets(img_dir)
-
-    # Cria um grupo de todos os sprites.
-    all_sprites = pygame.sprite.Group()
-    # Cria um grupo somente com os sprites de bloco.
-    # Sprites de block são aqueles que impedem o movimento do jogador
-    blocks = pygame.sprite.Group()
     
-    # Cria um grupo para tiros
-    bullets = pygame.sprite.Group()
-    
-    # Cria Sprite do jogador
-    player = Player(assets[PLAYER_IMG], 12, 2, blocks)
-    
-    
-
-    # Cria tiles de acordo com o mapa
-    for row in range(len(MAP)):
-        for column in range(len(MAP[row])):
-            tile_type = MAP[row][column]
-            if tile_type == BLOCK:
-                tile = Tile(assets[tile_type], row, column)
-                all_sprites.add(tile)
-                blocks.add(tile)
-
-    # Adiciona o jogador no grupo de sprites por último para ser desenhado por
-    # cima dos blocos
-    all_sprites.add(player)
-
     PLAYING = 0
     DONE = 1
 
@@ -317,10 +298,6 @@ def game_screen(screen):
 # Inicialização do Pygame.
 pygame.init()
 pygame.mixer.init()
-
-
-
-
 
 # Tamanho da tela.
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
