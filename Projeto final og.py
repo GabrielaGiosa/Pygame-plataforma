@@ -364,18 +364,12 @@ class Bullet(pygame.sprite.Sprite):
         # Corrige a posição do personagem para antes da colisão
         if len(collisions) > 0:
             self.kill()
-            
-        # Se colidiu com algum mob, morre
-        collisions = pygame.sprite.spritecollide(self, self.mob, False)
-        # Corrige a posição do personagem para antes da colisão
-        if len(collisions) > 0:
-            self.kill()
-            
+
 # Classe Mob que representa os meteoros
 class Mob(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y, blocks):
+    def __init__(self, x, y, blocks, fire):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -409,7 +403,7 @@ class Mob(pygame.sprite.Sprite):
         
         i = 0
         while i < len(spritesheetmob):
-            spritesheetmob[i] = pygame.transform.scale(spritesheetmob[i],(76,110))
+            spritesheetmob[i] = pygame.transform.scale(spritesheetmob[i],(50,73))
             self.image = spritesheetmob[i]
             self.image.set_colorkey(BLACK)
             i += 1
@@ -431,6 +425,7 @@ class Mob(pygame.sprite.Sprite):
         
         # Guarda o grupo de blocos para tratar as colisões
         self.blocks = blocks
+        self.fire = fire
         
         # Coloca no lugar inicial definido em x, y do constutor
         self.rect.bottom = y + 300
@@ -457,6 +452,10 @@ class Mob(pygame.sprite.Sprite):
 
         # Se já está na hora de mudar de imagem...
         if elapsed_ticks > self.frame_ticks:
+            if self.frame == 24:
+                self.fire = True
+            else:
+                self.fire = False
 
             # Marca o tick da nova imagem.
             self.last_update = now
@@ -474,6 +473,7 @@ class Mob(pygame.sprite.Sprite):
             center = self.rect.center
             # Atualiza imagem atual
             self.image = self.animation[self.frame]
+            self.mask = pygame.mask.from_surface(self.image)
             # Atualiza os detalhes de posicionamento
             self.rect = self.image.get_rect()
             self.rect.center = center
@@ -510,7 +510,7 @@ class Arrow(pygame.sprite.Sprite):
         
         # Carregando a imagem de fundo.
         arrow_img = pygame.image.load(path.join(img_dir, "arrow.png")).convert()
-        self.image = pygame.transform.scale(arrow_img,(42,7))
+        self.image = pygame.transform.scale(arrow_img,(30,5))
         
         # Arrumando tamanho da imagem
         
@@ -522,8 +522,8 @@ class Arrow(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
         # Coloca no lugar inicial definido em x, y do constutor
-        self.rect.bottom = y 
-        self.rect.centerx = x
+        self.rect.bottom = y + 60
+        self.rect.centerx = x + 40
         self.speedx = -10
         self.speedy = 0
 
@@ -560,7 +560,7 @@ background_rect = background.get_rect()
 
 # Carrega os sons do jogo
 pygame.mixer.music.load(path.join(snd_dir, 'blackmist II.mp3'))
-pygame.mixer.music.set_volume(0.4)
+pygame.mixer.music.set_volume(0)
 pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
 game_over_sound = pygame.mixer.Sound(path.join(snd_dir, 'game_over_bad_chest.wav'))
 arrow_sound = pygame.mixer.Sound(path.join(snd_dir, 'Archers-shooting.ogg'))
@@ -590,7 +590,7 @@ mob = pygame.sprite.Group()
 
 # Cria i mobs e adiciona no grupo
 for i in range(1):
-    m = Mob(row, column, blocks)
+    m = Mob(row, column, blocks, Arrow)
     all_sprites.add(m)
     mob.add(m)
 
@@ -599,23 +599,27 @@ bullets = pygame.sprite.Group()
 
 # Cria um grupo para flechas
 arrows = pygame.sprite.Group()
+
     
 # Comando para evitar travamentos.
 def game_screen(screen):
     
     # Loop principal.
+    
+    vida = 3
     running = True
     pygame.mixer.music.play(loops=-1)
     while running:
         
         # Ajusta a velocidade do jogo.
         clock.tick(FPS)
-        
-        if pygame.time.get_ticks() % 417 == 0: 
-            arrow = Arrow(750, 300)
-            all_sprites.add(arrow)
-            arrows.add(arrow)
-            arrow_sound.play()
+        for m in mob:
+            if m.fire:  
+                m.fire = False
+                arrow = Arrow(930, 180)
+                all_sprites.add(arrow)
+                arrows.add(arrow)
+                arrow_sound.play()
         
         # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
@@ -623,13 +627,7 @@ def game_screen(screen):
             # Verifica se foi fechado.
             if event.type == pygame.QUIT:
                 running = False
-
-            
-             # Verifica se foi fechado.
-            if event.type == pygame.QUIT:
-                running = False
                 
-
             # Verifica se pulou
             if event.type == pygame.KEYDOWN:                
                 if event.key == pygame.K_UP and player.state in POS:                    
@@ -674,9 +672,13 @@ def game_screen(screen):
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
             die_sound.play()
-            
+            m.kill()
+        hits = pygame.sprite.spritecollide(player, arrows, True)
+        for hit in hits: # Pode haver mais de um
+            # O meteoro e destruido e precisa ser recriado
+            vida = vida - 1
         # Verifica se caiu da tela
-        if player.rect.y > 700:
+        if player.rect.y > 700 or vida == 0:
             pygame.mixer.music.stop()
             game_over = pygame.image.load(path.join(img_dir, "Game-over-2.png")).convert()
             game_over_sound.play()    
