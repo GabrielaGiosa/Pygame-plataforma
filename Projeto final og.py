@@ -233,7 +233,7 @@ class Player(pygame.sprite.Sprite):
             # Atualiza os detalhes de posicionamento
             self.rect = self.image.get_rect()
             self.rect.center = center
-            
+            self.mask = pygame.mask.from_surface(self.image)
         # Tenta andar em y
         # Atualiza a velocidade aplicando a aceleração da gravidade
         self.speedy += GRAVITY
@@ -354,6 +354,7 @@ class Bullet(pygame.sprite.Sprite):
     # Metodo que atualiza a posição da bala
     def update(self):
         self.rect.x += self.speedx
+        self.mask = pygame.mask.from_surface(self.image)
         
         # Se o tiro passar do fim da tela, morre.
         if self.rect.x > 1300 or self.rect.x < 0:
@@ -429,7 +430,7 @@ class Mob(pygame.sprite.Sprite):
         
         # Coloca no lugar inicial definido em x, y do constutor
         self.rect.bottom = y + 300
-        self.rect.centerx = x + 1000
+        self.rect.centerx = x + 1200
         self.speedx = 0
         self.speedy = 0
         
@@ -477,6 +478,7 @@ class Mob(pygame.sprite.Sprite):
             # Atualiza os detalhes de posicionamento
             self.rect = self.image.get_rect()
             self.rect.center = center
+            self.mask = pygame.mask.from_surface(self.image)
             
         # Tenta andar em y
         # Atualiza a velocidade aplicando a aceleração da gravidade
@@ -523,14 +525,14 @@ class Arrow(pygame.sprite.Sprite):
 
         # Coloca no lugar inicial definido em x, y do constutor
         self.rect.bottom = y + 60
-        self.rect.centerx = x + 40
+        self.rect.centerx = x + 260
         self.speedx = -10
         self.speedy = 0
 
     # Metodo que atualiza a posição da bala
     def update(self):
         self.rect.x += self.speedx
-        
+        self.mask = pygame.mask.from_surface(self.image)
         # Se o tiro passar do fim da tela, morre.
         if self.rect.x > 1300 or self.rect.x < 0:
             self.kill()
@@ -556,15 +558,16 @@ column = len(MAP1[0])
 # Carrega o fundo do jogo
 background = pygame.image.load(path.join(img_dir, 'Full Moon - background.png')).convert()
 background_rect = background.get_rect()
-#game_over = pygame.image.load(path.join(img_dir, 'Game-over-2.png')).convert()
 
 # Carrega os sons do jogo
 pygame.mixer.music.load(path.join(snd_dir, 'blackmist II.mp3'))
-pygame.mixer.music.set_volume(0)
+pygame.mixer.music.set_volume(0.3)
 pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
 game_over_sound = pygame.mixer.Sound(path.join(snd_dir, 'game_over_bad_chest.wav'))
 arrow_sound = pygame.mixer.Sound(path.join(snd_dir, 'Archers-shooting.ogg'))
 die_sound = pygame.mixer.Sound(path.join(snd_dir, 'Hurting The Robot.wav'))
+grunt_sound = pygame.mixer.Sound(path.join(snd_dir, 'grunt.wav'))  
+victory_sound = pygame.mixer.Sound(path.join(snd_dir, 'victory.ogg'))
 
 # Sprites de block são aqueles que impedem o movimento do jogador
 blocks = pygame.sprite.Group()
@@ -607,6 +610,7 @@ def game_screen(screen):
     # Loop principal.
     
     vida = 3
+    vida_mob = 10
     running = True
     pygame.mixer.music.play(loops=-1)
     while running:
@@ -668,15 +672,19 @@ def game_screen(screen):
         all_sprites.update()
         
         # Verifica se houve colisão entre tiro e meteoro
-        hits = pygame.sprite.groupcollide(mob, bullets, True, True)
+        hits = pygame.sprite.groupcollide(mob, bullets, False, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
             die_sound.play()
-            m.kill()
-        hits = pygame.sprite.spritecollide(player, arrows, True)
+            vida_mob -= 1
+            if vida_mob == 0:
+                m.kill()
+        hits = pygame.sprite.spritecollide(player, arrows, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
-            vida = vida - 1
+            grunt_sound.play()
+            vida -= 1
+       
         # Verifica se caiu da tela
         if player.rect.y > 700 or vida == 0:
             pygame.mixer.music.stop()
@@ -688,7 +696,18 @@ def game_screen(screen):
             time.sleep(5)
             
             running = False
-           
+        
+        elif vida_mob == 0:
+            pygame.mixer.music.stop()
+            victory = pygame.image.load(path.join(img_dir, "victory.jpg")).convert()
+            screen.fill(BLACK)
+            screen.blit(victory,[0,0])
+            pygame.display.update()
+            victory_sound.play()    
+            time.sleep(10)
+            
+            running = False
+            
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
