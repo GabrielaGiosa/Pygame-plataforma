@@ -47,6 +47,7 @@ NEG = [LEFT, JUMP_LEFT, FALL_LEFT, IDLE_LEFT]
 
 # Define ações do mob
 ATTACK = 8
+DEAD = 9
 
 # Define os tipos de tiles
 BLOCK = 0
@@ -239,6 +240,7 @@ class Player(pygame.sprite.Sprite):
         self.speedy += GRAVITY
         # Atualiza a posição y
         self.rect.y += self.speedy
+
         
         # Se colidiu com algum bloco, volta para o ponto antes da colisão
         collisions = pygame.sprite.spritecollide(self, self.blocks, False)
@@ -399,8 +401,16 @@ class Mob(pygame.sprite.Sprite):
                           pygame.image.load(path.join(img_dir, "attack (7).png")).convert(),
                           pygame.image.load(path.join(img_dir, "attack (8).png")).convert(),
                           pygame.image.load(path.join(img_dir, "attack (9).png")).convert(),
-                          pygame.image.load(path.join(img_dir, "attack (10).png")).convert()
+                          pygame.image.load(path.join(img_dir, "attack (10).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "dead (1).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "dead (2).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "dead (3).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "dead (4).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "dead (5).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "dead (6).png")).convert()
                           ]
+
+        
         
         i = 0
         while i < len(spritesheetmob):
@@ -410,20 +420,35 @@ class Mob(pygame.sprite.Sprite):
             i += 1
         
         # Carregando a imagem de fundo.
-        self.animations = {ATTACK:spritesheetmob[0:25]}
+        self.animations = {ATTACK:spritesheetmob[0:25],
+                           DEAD:spritesheetmob[26:31]}
         
-        
+        self.morre = False
+        self.state = ATTACK 
         # Define estado atual (que define qual animação deve ser mostrada)
-        self.state = ATTACK
+        if self.state == ATTACK:
+            
         # Define animação atual
-        self.animation = self.animations[self.state]
-        # Inicializa o primeiro quadro da animação
-        self.frame = 0
-        self.image = self.animation[self.frame]
-        
-        # Detalhes sobre o posicionamento.
-        self.rect = self.image.get_rect()
-        
+            self.animation = self.animations[self.state]
+            # Inicializa o primeiro quadro da animação
+            self.frame = 0
+            self.image = self.animation[self.frame]
+            
+            # Detalhes sobre o posicionamento.
+            self.rect = self.image.get_rect()
+            
+        if self.state == DEAD:
+            
+        # Define animação atual
+            self.animation = self.animations[self.state]
+            # Inicializa o primeiro quadro da animação
+            self.frame = 0
+            self.image = self.animation[self.frame]
+            
+            
+            # Detalhes sobre o posicionamento.
+            self.rect = self.image.get_rect()
+    
         # Guarda o grupo de blocos para tratar as colisões
         self.blocks = blocks
         self.fire = fire
@@ -450,6 +475,10 @@ class Mob(pygame.sprite.Sprite):
 
         # Verifica quantos ticks se passaram desde a ultima mudança de frame.
         elapsed_ticks = now - self.last_update
+
+        if self.state == DEAD and self.frame == 4:
+            self.morre = True
+
 
         # Se já está na hora de mudar de imagem...
         if elapsed_ticks > self.frame_ticks:
@@ -678,7 +707,12 @@ def game_screen(screen):
             die_sound.play()
             vida_mob -= 1
             if vida_mob == 0:
+                m.state = DEAD
+        for m in mob:
+            print(m.frame)
+            if m.morre == True:
                 m.kill()
+                
                 
         hits = pygame.sprite.spritecollide(player, arrows, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
@@ -698,7 +732,8 @@ def game_screen(screen):
             
             running = False
         
-        elif vida_mob == 0:
+
+        if len(mob) == 0:
             pygame.mixer.music.stop()
             victory = pygame.image.load(path.join(img_dir, "victory.jpg")).convert()
             screen.fill(BLACK)
