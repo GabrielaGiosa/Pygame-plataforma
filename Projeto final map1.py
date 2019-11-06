@@ -679,6 +679,7 @@ def game_screen(screen):
             vida_mob -= 1
             if vida_mob == 0:
                 m.kill()
+                
         hits = pygame.sprite.spritecollide(player, arrows, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado

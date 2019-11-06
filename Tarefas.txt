@@ -1,6 +1,4 @@
-Para semana que vem:
-Fazer o mapa
-Personagem andando
-Inimigos andando
-Tiro
-Fazer alguém morrer
+﻿- Animação morte 'arqueiro', 'player', 'mago'
+- Projétil do mago congela posição e comandos Player
+- Projétil segue a direção da última posição do Player
+- Projétil 'Rock' lagosta
