@@ -701,6 +701,7 @@ background_rect = background.get_rect()
 pygame.mixer.music.load(path.join(snd_dir, 'the final boss.ogg'))
 pygame.mixer.music.set_volume(0.7)
 game_over_sound = pygame.mixer.Sound(path.join(snd_dir, 'game_over_bad_chest.wav'))
+pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
 laugh_sound = pygame.mixer.Sound(path.join(snd_dir, 'laugh-evil-1.ogg'))
 grunt_sound = pygame.mixer.Sound(path.join(snd_dir, 'grunt.wav'))  
 victory_sound = pygame.mixer.Sound(path.join(snd_dir, 'victory.ogg'))
@@ -790,7 +791,7 @@ def game_screen(screen):
                     bullet = Bullet(player.rect.centerx, player.rect.top, blocks, boss[0])
                     all_sprites.add(bullet)
                     bullets.add(bullet)
-                    pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
+                    pew_sound.stop()
                     pew_sound.play()                    
             
             # Verifica se soltou alguma tecla.
