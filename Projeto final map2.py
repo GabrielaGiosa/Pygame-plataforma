@@ -744,6 +744,16 @@ rocks = pygame.sprite.Group()
 # Cria um grupo só de itens health
 healths = pygame.sprite.Group()
 
+def bosshealth(vida_boss):
+    
+    if vida_boss > 750:
+        vida_boss_color = GREEN
+    elif vida_boss > 500:
+        vida_boss_color = YELLOW
+    else:
+        vida_boss_color = RED
+    
+    pygame.draw.rect(screen, vida_boss_color, (300, 100, vida_boss, 5))
     
 # Comando para evitar travamentos.
 def game_screen(screen):
@@ -751,7 +761,7 @@ def game_screen(screen):
     # Loop principal.
     
     vida = 5
-    vida_boss = 100
+    vida_boss = 1000
     running = True
     pygame.mixer.music.play(loops=-1)
     last_laugh = 0
@@ -842,7 +852,7 @@ def game_screen(screen):
         hits = pygame.sprite.spritecollide(boss[0], bullets, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
-            vida_boss -= 1
+            vida_boss -= 5
             if vida_boss == 0:
                 boss[0].kill()
         
@@ -912,6 +922,7 @@ def game_screen(screen):
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
+        bosshealth(vida_boss)
         all_sprites.draw(screen)
         
         # Depois de desenhar tudo, inverte o display.
