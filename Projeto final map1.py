@@ -709,7 +709,6 @@ def game_screen(screen):
             if vida_mob == 0:
                 m.state = DEAD
         for m in mob:
-            print(m.frame)
             if m.morre == True:
                 m.kill()
                 
