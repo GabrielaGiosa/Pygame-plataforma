@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # Importando as bibliotecas necessárias.
-import pygame, time
+import pygame, time, random
 from os import path
 #from pygame_functions import *
 
 # Estabelece a pasta que contem as figuras.
 img_dir = path.join(path.dirname(__file__), 'imagens_rep')
 snd_dir = path.join(path.dirname(__file__), 'sons_rep')
-
 
 # Dados gerais do jogo.
 WIDTH = 1300 # Largura da tela
@@ -45,40 +44,73 @@ IDLE_LEFT = 7
 POS = [IDLE, RIGHT, JUMP, FALL]
 NEG = [LEFT, JUMP_LEFT, FALL_LEFT, IDLE_LEFT]
 
-# Define ações do mob
+# Define ações do boss
 WALK_RIGHT = 8
 WALK_LEFT = 9
 SHOOT_RIGHT = 10
 SHOOT_LEFT = 11
+SHOOT = [SHOOT_RIGHT, SHOOT_LEFT]
 # Define os tipos de tiles
 BLOCK = 0
 EMPTY = -1
 
 # Define o mapa com os tipos de tiles
-MAP1 = [
+MAP1 = [   
+        [],    
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+        [],    
+        [],
+        [],    
+        [],
+        [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],    
+        [],
+        [],    
+        [],    
+        [],
+        [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK]
+        ]
+
+# Classe Health que representa os meteoros
+class HealthBar(pygame.sprite.Sprite):
     
-    [],    
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],    
-    [],
-    [],    
-    [],
-    [],    
-    [],
-    [],    
-    [],    
-    [],
-    [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK]
-    ]
-
-
-
+    # Construtor da classe.
+    def __init__(self):
+        
+        # Construtor da classe pai (Sprite).
+        pygame.sprite.Sprite.__init__(self)
+        
+        self.healthsheet =    [pygame.image.load(path.join(img_dir, "health(1).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "health(2).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "health(3).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "health(4).png")).convert(),
+                          pygame.image.load(path.join(img_dir, "health(5).png")).convert()
+                          ]
+        
+        i = 0
+        while i < len(self.healthsheet):
+            self.image = self.healthsheet[i]
+            self.image.set_colorkey(BLACK)
+            i += 1
+        
+        self.frame = 4
+        self.image = self.healthsheet[self.frame]
+        
+        # Detalhes sobre o posicionamento.
+        self.rect = self.image.get_rect()
+        
+        # Sorteia um lugar inicial em x
+        self.rect.x = 20
+        # Sorteia um lugar inicial em y
+        self.rect.y = - 30
+        
+    def update(self):
+        self.image = self.healthsheet[self.frame]
 
 # Class que representa os blocos do cenário
 class Tile(pygame.sprite.Sprite):
@@ -103,6 +135,55 @@ class Tile(pygame.sprite.Sprite):
         self.rect.x = TILE_SIZE * column
         self.rect.y = TILE_SIZE * row
 
+# Classe Health que representa os meteoros
+class Health(pygame.sprite.Sprite):
+    
+    # Construtor da classe.
+    def __init__(self, blocks):
+        
+        # Construtor da classe pai (Sprite).
+        pygame.sprite.Sprite.__init__(self)
+        
+        # Carregando a imagem de fundo.
+        health_img = pygame.image.load(path.join(img_dir, "health.png")).convert()
+        
+        # Diminuindo o tamanho da imagem.
+        self.image = pygame.transform.scale(health_img, (43,40))
+        
+        # Deixando transparente.
+        self.image.set_colorkey(BLACK)
+        
+        # Detalhes sobre o posicionamento.
+        self.rect = self.image.get_rect()
+        
+        # Guarda o grupo de blocos para tratar as colisões
+        self.blocks = blocks
+        
+        # Sorteia um lugar inicial em x
+        self.rect.x = random.randint(43, WIDTH - 43)
+        # Sorteia um lugar inicial em y
+        self.rect.y = 0
+        # Sorteia uma velocidade inicial
+        self.speedx = 0
+        self.speedy = 0
+
+
+    def update(self):
+        self.speedy += GRAVITY
+        self.rect.y += GRAVITY
+        
+        # Corrige a posição do personagem para antes da colisão
+        collisions = pygame.sprite.spritecollide(self, self.blocks, False)
+        for collision in collisions:
+            # Estava indo para baixo
+            if self.speedy > 0:
+                self.rect.bottom = collision.rect.top
+                self.speedy = 0
+                
+            # Estava indo para cima
+            elif self.speedy < 0:
+                self.rect.top = collision.rect.bottom
+                self.speedy = 0 
 # Classe Jogador que representa Jack
 class Player(pygame.sprite.Sprite):
     
@@ -171,6 +252,8 @@ class Player(pygame.sprite.Sprite):
                            JUMP_LEFT:spritesheet[31:32],
                            FALL_LEFT:spritesheet[31:32],
                            IDLE_LEFT:spritesheet[32:42]}
+        
+        self.damage = False
         
         
         # Define estado atual (que define qual animação deve ser mostrada)
@@ -272,8 +355,7 @@ class Player(pygame.sprite.Sprite):
                 elif self.state == FALL_LEFT:
                     self.state = IDLE_LEFT
                 # Se colidiu com algo, para de cair
-                self.speedy = 0
-                
+                self.speedy = 0                
                
         if self.state == IDLE or self.state == IDLE_LEFT:
             # Define variável para caminhar
@@ -319,7 +401,7 @@ class Player(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y, blocks, mob):
+    def __init__(self, x, y, blocks, boss):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -341,7 +423,7 @@ class Bullet(pygame.sprite.Sprite):
         self.blocks = blocks
         
         # Guarda o grupo de blocos para tratar as colisões
-        self.mob = mob
+        self.boss = boss
         
         # Coloca no lugar inicial definido em x, y do constutor
         if player.state in POS:
@@ -372,7 +454,7 @@ class Bullet(pygame.sprite.Sprite):
 class Boss(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y, blocks, fire):
+    def __init__(self, x, y, blocks):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -385,7 +467,7 @@ class Boss(pygame.sprite.Sprite):
                           pygame.image.load(path.join(img_dir, "spr_lobster_walk_5.png")).convert(),
                           pygame.image.load(path.join(img_dir, "spr_lobster_walk_6.png")).convert(),
                           pygame.image.load(path.join(img_dir, "spr_lobster_walk_7.png")).convert(),
-                           pygame.transform.flip(pygame.image.load(path.join(img_dir, "spr_lobster_walk_0.png")).convert(), True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir, "spr_lobster_walk_0.png")).convert(), True, False),
                           pygame.transform.flip(pygame.image.load(path.join(img_dir, "spr_lobster_walk_1.png")).convert(), True, False),
                           pygame.transform.flip(pygame.image.load(path.join(img_dir, "spr_lobster_walk_2.png")).convert(), True, False),
                           pygame.transform.flip(pygame.image.load(path.join(img_dir, "spr_lobster_walk_3.png")).convert(), True, False),
@@ -425,7 +507,7 @@ class Boss(pygame.sprite.Sprite):
         
         i = 0
         while i < len(spritesheetboss):
-            spritesheetboss[i] = pygame.transform.scale(spritesheetboss[i],(275,190))
+            spritesheetboss[i] = pygame.transform.scale(spritesheetboss[i],(217,150))
             self.image = spritesheetboss[i]
             self.image.set_colorkey(BLACK)
             i += 1
@@ -447,12 +529,12 @@ class Boss(pygame.sprite.Sprite):
         
         # Guarda o grupo de blocos para tratar as colisões
         self.blocks = blocks
-        self.fire = fire
+        self.fire = False
         
         # Coloca no lugar inicial definido em x, y do constutor
-        self.rect.bottom = y + 300
-        self.rect.centerx = x + 1100
-        self.speedx = 0
+        self.rect.bottom = y + 700
+        self.rect.centerx = x + 1200
+        self.speedx = -8
         self.speedy = 0
         
         # Guarda o tick da primeira imagem
@@ -461,7 +543,7 @@ class Boss(pygame.sprite.Sprite):
         # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
         self.frame_ticks = 100
         
-    # Metodo que atualiza a posição de mob
+    # Metodo que atualiza a posição de boss
     def update(self):
         # Vamos tratar os movimentos de maneira independente.
         # Primeiro tentamos andar no eixo y e depois no x.
@@ -474,7 +556,7 @@ class Boss(pygame.sprite.Sprite):
 
         # Se já está na hora de mudar de imagem...
         if elapsed_ticks > self.frame_ticks:
-            if self.frame == 24:
+            if self.state in SHOOT and self.frame == 7:
                 self.fire = True
             else:
                 self.fire = False
@@ -495,8 +577,6 @@ class Boss(pygame.sprite.Sprite):
             center = self.rect.center
             # Atualiza imagem atual
             self.image = self.animation[self.frame]
-            self.mask = pygame.mask.from_surface(self.image)
-            # Atualiza os detalhes de posicionamento
             self.rect = self.image.get_rect()
             self.rect.center = center
             self.mask = pygame.mask.from_surface(self.image)
@@ -524,51 +604,76 @@ class Boss(pygame.sprite.Sprite):
         
          # Tenta andar em x
         self.rect.x += self.speedx
+        
         # Corrige a posição caso tenha passado do tamanho da janela
         if self.rect.left < 0:
             self.rect.left = 0
+            self.speedx = 0
             self.state = SHOOT_RIGHT
-            self.speedx = 0
+            self.frame = 0
         elif self.rect.right >= WIDTH:
-            self.rect.right = WIDTH - 1
+            self.rect.right = WIDTH - 10
+            self.speedx = 0      
             self.state = SHOOT_LEFT
-            self.speedx = 0
+            self.frame = 0
+        
+        if self.frame == (len(self.animation)-1) and self.state == SHOOT_RIGHT:
+            self.state = WALK_RIGHT
+            self.frame = 0
+            self.speedx = 8
+        elif self.frame == (len(self.animation)-1) and self.state == SHOOT_LEFT:
+            self.state = WALK_LEFT
+            self.frame = 0
+            self.speedx = -8
+
+            
 
 # Classe Rock que representa flechas
 class Rock(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y):
+    def __init__(self, x, y, player):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
         
         # Carregando a imagem de fundo.
         rock_img = pygame.image.load(path.join(img_dir, "pedra.png")).convert()
-        self.image = pygame.transform.scale(rock_img,(30,5))
-        
-        # Arrumando tamanho da imagem
-        
-        
+        self.image = pygame.transform.scale(rock_img,(15,15))
+
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
         
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
+        
+        # Guarda o grupo de blocos para tratar as colisões
+        self.player = player
 
         # Coloca no lugar inicial definido em x, y do constutor
-        self.rect.bottom = y + 60
-        self.rect.centerx = x + 260
-        self.speedx = -10
-        self.speedy = 0
+        if boss[0].state == SHOOT_RIGHT:
+            self.rect.bottom = y + 200
+            self.rect.centerx = x + 30
+            self.speedx = random.randint(5, 18)
+            self.speedy = random.randint(-80, -30)
+        if boss[0].state == SHOOT_LEFT:
+            self.rect.bottom = y + 200
+            self.rect.centerx = x - 30
+            self.speedx = random.randint(-18, -5)
+            self.speedy = random.randint(-80, -30)
 
-    # Metodo que atualiza a posição da bala
+    # Metodo que atualiza a posição da pedra
     def update(self):
         self.rect.x += self.speedx
+        self.speedy += GRAVITY
+        self.rect.y += self.speedy
         self.mask = pygame.mask.from_surface(self.image)
         # Se o tiro passar do fim da tela, morre.
         if self.rect.x > 1300 or self.rect.x < 0:
             self.kill()
+        if self.rect.y > 700:
+            self.kill()
+
 
 # Inicialização do Pygame.
 pygame.init()
@@ -594,12 +699,13 @@ background_rect = background.get_rect()
 
 # Carrega os sons do jogo
 pygame.mixer.music.load(path.join(snd_dir, 'the final boss.ogg'))
-pygame.mixer.music.set_volume(1)
-pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
+pygame.mixer.music.set_volume(0.7)
 game_over_sound = pygame.mixer.Sound(path.join(snd_dir, 'game_over_bad_chest.wav'))
 laugh_sound = pygame.mixer.Sound(path.join(snd_dir, 'laugh-evil-1.ogg'))
 grunt_sound = pygame.mixer.Sound(path.join(snd_dir, 'grunt.wav'))  
 victory_sound = pygame.mixer.Sound(path.join(snd_dir, 'victory.ogg'))
+boom_sound = pygame.mixer.Sound(path.join(snd_dir, 'boom.ogg'))
+heal_sound = pygame.mixer.Sound(path.join(snd_dir, 'healspell.ogg'))
 
 # Sprites de block são aqueles que impedem o movimento do jogador
 blocks = pygame.sprite.Group()
@@ -607,11 +713,17 @@ blocks = pygame.sprite.Group()
 # Cria Jack. O construtor será chamado automaticamente.
 player = Player(row, column, blocks)
 
-boss = Boss(row, column, blocks, Rock)
+# Cria Boss. O construtor será chamado automaticamente.
+boss = [Boss(row, column, blocks)]
+
+# Cria barra de vida. O construtor será chamado automaticamente.
+healthbar = HealthBar()
 
 # Cria um grupo de sprites e adiciona Jack.
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
+all_sprites.add(boss)
+all_sprites.add(healthbar)
 
 # Cria tiles de acordo com o mapa
 for row in range(len(MAP1)):
@@ -628,16 +740,21 @@ bullets = pygame.sprite.Group()
 # Cria um grupo para flechas
 rocks = pygame.sprite.Group()
 
+# Cria um grupo só de itens health
+healths = pygame.sprite.Group()
+
     
 # Comando para evitar travamentos.
 def game_screen(screen):
     
     # Loop principal.
     
-    vida = 3
+    vida = 5
     vida_boss = 100
     running = True
     pygame.mixer.music.play(loops=-1)
+    last_laugh = 0
+    last_heal = 0
     while running:
         
         # Ajusta a velocidade do jogo.
@@ -670,9 +787,10 @@ def game_screen(screen):
                     player.state = RIGHT
                 # Se for um espaço atira!
                 if event.key == pygame.K_SPACE:
-                    bullet = Bullet(player.rect.centerx, player.rect.top, blocks, boss)
+                    bullet = Bullet(player.rect.centerx, player.rect.top, blocks, boss[0])
                     all_sprites.add(bullet)
                     bullets.add(bullet)
+                    pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
                     pew_sound.play()                    
             
             # Verifica se soltou alguma tecla.
@@ -689,21 +807,85 @@ def game_screen(screen):
         # Atualiza a acao de cada sprite.
         all_sprites.update()
         
+        # Tempo da risada
+        now = pygame.time.get_ticks()
+        elapsed_time = now - last_laugh
+        if elapsed_time > 15000:
+            laugh_sound.play()   
+            last_laugh = now
+            
+        # Tempo da risada
+        now_heal = pygame.time.get_ticks()
+        elapsed_heal = now_heal - last_heal      
+        if elapsed_heal > random.randint(25000, 35000):
+            health = Health(blocks)
+            all_sprites.add(health)
+            healths.add(health)
+            last_heal = now_heal
+        
+        # Quando jogar pedra
+        if boss[0].state == SHOOT_RIGHT and boss[0].frame == 7 or boss[0].state == SHOOT_LEFT and boss[0].frame == 7:
+            r = random.randint(5, 10)
+            if boss[0].fire == False:
+                for i in range (r):
+                    #boss[0].fire = True
+                    rock = Rock(boss[0].rect.centerx, boss[0].rect.top, boss[0])
+                    all_sprites.add(rock)
+                    rocks.add(rock)
+                    boom_sound.play()
+                boss[0].fire = True
+            else:
+                boss[0].fire == False
+                
         # Verifica se houve colisão entre tiro e boss
-        hits = pygame.sprite.spritecollide(boss, bullets, True, pygame.sprite.collide_mask)
+        hits = pygame.sprite.spritecollide(boss[0], bullets, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
             vida_boss -= 1
             if vida_boss == 0:
-                boss.kill()
+                boss[0].kill()
         
         hits = pygame.sprite.spritecollide(player, rocks, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
             grunt_sound.play()
             vida -= 1
-       
-        # Verifica se caiu da tela
+            healthbar.frame -= 1
+            
+        hits = pygame.sprite.spritecollide(player, boss, False, pygame.sprite.collide_mask)
+        for hit in hits: # Pode haver mais de um
+            # O meteoro e destruido e precisa ser recriado
+            if not player.damage:
+                player.damage = True
+                grunt_sound.play()
+                vida -= 1
+                healthbar.frame -= 1
+                if player.speedx == 0 and player.speedy == 0 and boss[0].state == WALK_RIGHT:
+                    player.speedx = 10
+                    player.speedy = 10
+                elif player.speedx == 0 and player.speedy == 0 and boss[0].state == WALK_LEFT:
+                    player.speedx = -10
+                    player.speedy = 10
+                else:
+                    player.speedx *= 1
+                    player.speedy *= -1.5
+        player.damage = False
+            
+            
+        hits = pygame.sprite.spritecollide(player, healths, True, pygame.sprite.collide_mask)
+        for hit in hits: # Pode haver mais de um
+            # O meteoro e destruido e precisa ser recriado
+            if vida < 4:
+                vida += 2        
+                healthbar.frame += 2
+            elif vida < 5:
+                vida += 1
+                healthbar.frame += 1
+            else:
+                vida == 5
+            heal_sound.play()
+            
+        # Verifica se morreu
         if vida == 0:
             pygame.mixer.music.stop()
             game_over = pygame.image.load(path.join(img_dir, "Game-over-2.png")).convert()
