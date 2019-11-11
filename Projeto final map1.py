@@ -566,6 +566,173 @@ class Arrow(pygame.sprite.Sprite):
         if self.rect.x > 1300 or self.rect.x < 0:
             self.kill()
 
+#Classe que representa os Magos 
+class Magician(pygame.sprite.Sprite):
+    #Construtor da Classe 
+    def __init__(self, x, y, blocks, fire):
+        # Construtor da classe Final (sprite) 
+        pygame.sprite.Sprite.__init__(self)
+        
+        spritesheetmag =  [
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_000.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_000.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_002.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_003.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_004.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_005.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_006.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_007.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_008.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_009.png" )).convert(),True, False),
+                           ]
+        i = 0
+        while i < len(spritesheetmag):
+            spritesheetmag[i] = pygame.transform.scale(spritesheetmag[i],(50,44))
+            self.image = spritesheetmag[i]
+            self.image.set_colorkey(BLACK)
+            i += 1
+         # Carregando a imagem de fundo.
+        self.animations = {ATTACK:spritesheetmag[0:22]}
+        
+        
+        # Define estado atual (que define qual animação deve ser mostrada)
+        self.state = ATTACK
+        # Define animação atual
+        self.animation = self.animations[self.state]
+        # Inicializa o primeiro quadro da animação
+        self.frame = 0
+        self.image = self.animation[self.frame]
+        
+        # Detalhes sobre o posicionamento.
+        self.rect = self.image.get_rect()
+        
+        # Guarda o grupo de blocos para tratar as colisões
+        self.blocks = blocks
+        self.fire = fire
+        
+        # Coloca no lugar inicial definido em x, y do constutor
+        self.rect.bottom = y
+        self.rect.centerx = x
+        self.speedx = 0
+        self.speedy = 0
+        
+        # Guarda o tick da primeira imagem
+        self.last_update = pygame.time.get_ticks()
+
+        # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
+        self.frame_ticks = 100
+        
+    # Metodo que atualiza a posição dos Magos 
+    def update(self):
+        # Vamos tratar os movimentos de maneira independente.
+        # Primeiro tentamos andar no eixo y e depois no x.
+        
+        # Verifica o tick atual.
+        now = pygame.time.get_ticks()
+
+        # Verifica quantos ticks se passaram desde a ultima mudança de frame.
+        elapsed_ticks = now - self.last_update
+
+        # Se já está na hora de mudar de imagem...
+        if elapsed_ticks > self.frame_ticks:
+            if self.frame == 21:
+                self.fire = True
+            else:
+                self.fire = False
+
+            # Marca o tick da nova imagem.
+            self.last_update = now
+            
+            # Avança um quadro.
+            self.frame += 1
+        
+            # Atualiza animação atual
+            self.animation = self.animations[self.state]
+            # Reinicia a animação caso o índice da imagem atual seja inválido
+            if self.frame >= len(self.animation):
+                self.frame = 0
+            
+            # Armazena a posição do centro da imagem
+            center = self.rect.center
+            # Atualiza imagem atual
+            self.image = self.animation[self.frame]
+            self.mask = pygame.mask.from_surface(self.image)
+            # Atualiza os detalhes de posicionamento
+            self.rect = self.image.get_rect()
+            self.rect.center = center
+            self.mask = pygame.mask.from_surface(self.image)
+            
+        # Tenta andar em y
+        # Atualiza a velocidade aplicando a aceleração da gravidade
+        self.speedy += GRAVITY
+        # Atualiza a posição y
+        self.rect.y += self.speedy
+        
+        # Se colidiu com algum bloco, volta para o ponto antes da colisão
+        collisions = pygame.sprite.spritecollide(self, self.blocks, False)
+
+        # Corrige a posição do personagem para antes da colisão
+        for collision in collisions:
+            # Estava indo para baixo
+            if self.speedy > 0:
+                self.rect.bottom = collision.rect.top
+                self.speedy = 0
+                
+            # Estava indo para cima
+            elif self.speedy < 0:
+                self.rect.top = collision.rect.bottom
+                self.speedy = 0 
+        
+
+class Ice(pygame.sprite.Sprite):
+    
+    # Construtor da classe.
+    def __init__(self, x, y):
+        
+        # Construtor da classe pai (Sprite).
+        pygame.sprite.Sprite.__init__(self)
+        
+        # Carregando a imagem de fundo.
+        arrow_img = pygame.image.load(path.join(img_dir, "ice spell.png")).convert()
+        self.image = pygame.transform.scale(arrow_img,(30,5))
+        
+        # Arrumando tamanho da imagem
+        
+        
+        # Deixando transparente.
+        self.image.set_colorkey(BLACK)
+        
+        # Detalhes sobre o posicionamento.
+        self.rect = self.image.get_rect()
+
+        # Coloca no lugar inicial definido em x, y do constutor
+        self.rect.bottom = y + 60
+        self.rect.centerx = x + 260
+        self.speedx = 10
+        self.speedy = 0
+
+    # Metodo que atualiza a posição da bala
+    def update(self):
+        self.rect.x += self.speedx
+        self.mask = pygame.mask.from_surface(self.image)
+        # Se o tiro passar do fim da tela, morre.
+        if self.rect.x > 1300 or self.rect.x < 0:
+            self.kill()
+
+
+
 # Inicialização do Pygame.
 pygame.init()
 pygame.mixer.init()
@@ -620,11 +787,20 @@ for row in range(len(MAP1)):
 # Cria um grupo só de esqueletos
 mob = pygame.sprite.Group()
 
+#Cria um grupo so para magos 
+mag = pygame.sprite.Group() 
+
 # Cria i mobs e adiciona no grupo
 for i in range(1):
     m = Mob(row, column, blocks, Arrow)
     all_sprites.add(m)
     mob.add(m)
+    
+# Cria x magos e adiciona o grupo 
+for x in range(1):
+    mg = Magician(row, column, blocks, Ice)
+    all_sprites.add(mg)
+    mag.add(mg)
 
 # Cria um grupo para tiros
 bullets = pygame.sprite.Group()
@@ -632,7 +808,9 @@ bullets = pygame.sprite.Group()
 # Cria um grupo para flechas
 arrows = pygame.sprite.Group()
 
-    
+#Cria um grupo so para icehits
+ices = pygame.sprite.Group()     
+
 # Comando para evitar travamentos.
 def game_screen(screen):
     
@@ -646,6 +824,8 @@ def game_screen(screen):
         
         # Ajusta a velocidade do jogo.
         clock.tick(FPS)
+        
+        #Adiciona as flechas no mapa 
         for m in mob:
             if m.fire:  
                 m.fire = False
@@ -653,7 +833,18 @@ def game_screen(screen):
                 all_sprites.add(arrow)
                 arrows.add(arrow)
                 arrow_sound.play()
-        
+                
+        #Adiciona os ices
+        for mg in mag:
+            if mg.fire:
+                mg.fire = False
+                ice = Ice(-225,280)
+                all_sprites.add(ice)
+                ices.add(ice) 
+                
+                
+                
+                
         # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
             
@@ -708,6 +899,7 @@ def game_screen(screen):
             vida_mob -= 1
             if vida_mob == 0:
                 m.state = DEAD
+                print(m.frame)
         for m in mob:
             if m.morre == True:
                 m.kill()
@@ -727,12 +919,11 @@ def game_screen(screen):
             screen.fill(BLACK)
             screen.blit(game_over,[0,0])
             pygame.display.update()
-            time.sleep(5)
+            time.sleep(10)
             
             running = False
         
-
-        if len(mob) == 0:
+        elif len(mob) == 0 :
             pygame.mixer.music.stop()
             victory = pygame.image.load(path.join(img_dir, "victory.jpg")).convert()
             screen.fill(BLACK)
