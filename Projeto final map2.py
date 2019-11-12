@@ -746,9 +746,9 @@ healths = pygame.sprite.Group()
 
 def bosshealth(vida_boss):
     
-    if vida_boss > 750:
+    if vida_boss > 666:
         vida_boss_color = GREEN
-    elif vida_boss > 500:
+    elif vida_boss > 333:
         vida_boss_color = YELLOW
     else:
         vida_boss_color = RED
@@ -852,6 +852,7 @@ def game_screen(screen):
         hits = pygame.sprite.spritecollide(boss[0], bullets, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
+
             vida_boss -= 5
             if vida_boss == 0:
                 boss[0].kill()
