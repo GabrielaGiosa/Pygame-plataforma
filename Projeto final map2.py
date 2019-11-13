@@ -753,7 +753,7 @@ def bosshealth(vida_boss):
     else:
         vida_boss_color = RED
     
-    pygame.draw.rect(screen, vida_boss_color, (300, 100, vida_boss, 5))
+    pygame.draw.rect(screen, vida_boss_color, (WIDTH - vida_boss, 150, vida_boss, 5))
     
 # Comando para evitar travamentos.
 def game_screen(screen):
