@@ -60,18 +60,18 @@ MAP1 = [
     [],
     [],
     [],
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, BLOCK,BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     [],
     [],
-    [],
-    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY],    
     [BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY],
     [],    
-    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
     [],    
     [BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY],
     [],    
-    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],    
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],    
     [],
     [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY,EMPTY, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK]
     ]
@@ -314,7 +314,7 @@ class Player(pygame.sprite.Sprite):
         elif self.state == IDLE_LEFT or self.state == LEFT:
             self.speedy -= JUMP_SIZE
             self.state = JUMP_LEFT
-           
+    
 # Classe Bullet que representa os tiros
 class Bullet(pygame.sprite.Sprite):
     
@@ -534,7 +534,7 @@ class Mob(pygame.sprite.Sprite):
 class Arrow(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y):
+    def __init__(self, x, y, speedx, speedy):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -553,14 +553,19 @@ class Arrow(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
         # Coloca no lugar inicial definido em x, y do constutor
-        self.rect.bottom = y + 60
-        self.rect.centerx = x + 260
-        self.speedx = -10
-        self.speedy = 0
+        self.rect.centery = y
+        self.rect.centerx = x
+        self.cx = x
+        self.cy = y
+        self.speedx = speedx
+        self.speedy = speedy
 
     # Metodo que atualiza a posição da bala
     def update(self):
-        self.rect.x += self.speedx
+        self.cx += self.speedx
+        self.cy += self.speedy
+        self.rect.x = int(self.cx)
+        self.rect.y = int(self.cy)
         self.mask = pygame.mask.from_surface(self.image)
         # Se o tiro passar do fim da tela, morre.
         if self.rect.x > 1300 or self.rect.x < 0:
@@ -699,33 +704,39 @@ class Magician(pygame.sprite.Sprite):
 class Ice(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y):
+    def __init__(self, x, y, speedx, speedy):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
         
         # Carregando a imagem de fundo.
         arrow_img = pygame.image.load(path.join(img_dir, "ice spell.png")).convert()
-        self.image = pygame.transform.scale(arrow_img,(30,5))
+        self.image = pygame.transform.scale(arrow_img,(15,14))
         
         # Arrumando tamanho da imagem
         
         
         # Deixando transparente.
-        self.image.set_colorkey(BLACK)
+        self.image.set_colorkey(WHITE)
         
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
 
         # Coloca no lugar inicial definido em x, y do constutor
-        self.rect.bottom = y + 60
-        self.rect.centerx = x + 260
-        self.speedx = 10
-        self.speedy = 0
+        self.rect.centery = y
+        self.rect.centerx = x
+        self.cx = x
+        self.cy = y
+        self.speedx = speedx
+        self.speedy = speedy
+
 
     # Metodo que atualiza a posição da bala
     def update(self):
-        self.rect.x += self.speedx
+        self.cx += self.speedx
+        self.cy += self.speedy
+        self.rect.x = int(self.cx)
+        self.rect.y = int(self.cy)
         self.mask = pygame.mask.from_surface(self.image)
         # Se o tiro passar do fim da tela, morre.
         if self.rect.x > 1300 or self.rect.x < 0:
@@ -829,7 +840,15 @@ def game_screen(screen):
         for m in mob:
             if m.fire:  
                 m.fire = False
-                arrow = Arrow(930, 180)
+                dx = player.rect.centerx - m.rect.left
+                dy = player.rect.centery - m.rect.centery
+                d = (dx**2 + dy**2)**(1/2)
+                if dy < 0:
+                    Sy = -10*dy/d
+                Sx = 10*dx/d
+                Sy = 10*dy/d
+
+                arrow = Arrow(m.rect.left, m.rect.centery, Sx, Sy)
                 all_sprites.add(arrow)
                 arrows.add(arrow)
                 arrow_sound.play()
@@ -838,7 +857,18 @@ def game_screen(screen):
         for mg in mag:
             if mg.fire:
                 mg.fire = False
-                ice = Ice(-225,280)
+                
+                dx2 = player.rect.centerx - mg.rect.left
+                dy2 = player.rect.centery - mg.rect.centery
+                d2 = (dx2**2 + dy2**2)**(1/2)
+                if dy2 < 0:
+                    Sy2 = -10*dy2/d2
+                Sx2 = 10*dx2/d2
+                Sy2 = 10*dy2/d2                
+
+
+                
+                ice = Ice(mg.rect.right, mg.rect.centery, Sx2, Sy2)
                 all_sprites.add(ice)
                 ices.add(ice) 
                 
@@ -875,7 +905,6 @@ def game_screen(screen):
                     bullet = Bullet(player.rect.centerx, player.rect.top, blocks, mob)
                     all_sprites.add(bullet)
                     bullets.add(bullet)
-		    pew_sound.stop()  
                     pew_sound.play()                    
             
             # Verifica se soltou alguma tecla.
