@@ -42,8 +42,10 @@ FALL = 4
 JUMP_LEFT = 5
 FALL_LEFT = 6
 IDLE_LEFT = 7
-POS = [IDLE, RIGHT, JUMP, FALL]
-NEG = [LEFT, JUMP_LEFT, FALL_LEFT, IDLE_LEFT]
+ICED = 8 
+ICED_LEFT = 9
+POS = [IDLE, RIGHT, JUMP, FALL,ICED]
+NEG = [LEFT, JUMP_LEFT, FALL_LEFT, IDLE_LEFT,ICED_LEFT]
 
 # Define ações do mob
 ATTACK = 8
@@ -153,7 +155,10 @@ class Player(pygame.sprite.Sprite):
                           pygame.transform.flip(pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_006.png")).convert(), True, False),
                           pygame.transform.flip(pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_007.png")).convert(), True, False),
                           pygame.transform.flip(pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_008.png")).convert(), True, False),
-                          pygame.transform.flip(pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_009.png")).convert(), True, False)]         
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir, "JK_P_Gun__Idle_009.png")).convert(), True, False),        
+                          pygame.image.load(path.join(img_dir, "rapazinhoAzul.png")).convert(),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir, "rapazinhoAzul.png")).convert(), True,False)] 
+                          
         i = 0
         while i < len(spritesheet):
             spritesheet[i] = pygame.transform.scale(spritesheet[i],(40,38))
@@ -169,7 +174,9 @@ class Player(pygame.sprite.Sprite):
                            RIGHT:spritesheet[21:31],
                            JUMP_LEFT:spritesheet[31:32],
                            FALL_LEFT:spritesheet[31:32],
-                           IDLE_LEFT:spritesheet[32:42]}
+                           IDLE_LEFT:spritesheet[32:42],
+                           ICED:spritesheet[42:43],
+                           ICED_LEFT:spritesheet[43:44]} 
         
         
         # Define estado atual (que define qual animação deve ser mostrada)
@@ -200,15 +207,35 @@ class Player(pygame.sprite.Sprite):
 
         # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
         self.frame_ticks = 100
+        self.freeze_ticks = 1500
+        self.startfreeze_ticks = 0
+    def freeze(self): 
+        self.prevstate = self.state 
+        if self.state in POS:
+            self.state = ICED 
+        elif self.state in NEG:
+            self.state = ICED_LEFT
+        self.frame = 0 
+        self.animation = self.animations[self.state]
+        self.image = self.animation[self.frame]
+        self.startfreeze_ticks = pygame.time.get_ticks()
         
     # Metodo que atualiza a posição de Jack
     def update(self):
         # Vamos tratar os movimentos de maneira independente.
         # Primeiro tentamos andar no eixo y e depois no x.
-        
-        # Verifica o tick atual.
+         # Verifica o tick atual.
         now = pygame.time.get_ticks()
-
+        if self.state == ICED or self.state == ICED_LEFT: 
+            
+            elapsed_ticks = now - self.startfreeze_ticks
+            if elapsed_ticks > self.freeze_ticks: 
+                self.state = self.prevstate
+            else: 
+                return 
+                
+            
+            
         # Verifica quantos ticks se passaram desde a ultima mudança de frame.
         elapsed_ticks = now - self.last_update
 
@@ -891,31 +918,41 @@ def game_screen(screen):
                     player.jump()
                     player.state = JUMP_LEFT
             
-            # Verifica se apertou alguma tecla.
-            if event.type == pygame.KEYDOWN:
-                # Dependendo da tecla, altera a velocidade.
-                if event.key == pygame.K_LEFT:
-                    player.speedx = -5
-                    player.state = LEFT
-                elif event.key == pygame.K_RIGHT:
-                    player.speedx = 5
-                    player.state = RIGHT
-                # Se for um espaço atira!
-                if event.key == pygame.K_SPACE:
-                    bullet = Bullet(player.rect.centerx, player.rect.top, blocks, mob)
-                    all_sprites.add(bullet)
-                    bullets.add(bullet)
-                    pew_sound.play()                    
+            if player.state != ICED and player.state != ICED_LEFT:  
+                # Verifica se pulou
+                if event.type == pygame.KEYDOWN:       
+                    if event.key == pygame.K_UP and player.state in POS:                    
+                        player.jump()
+                        player.state = JUMP
+                    elif event.key == pygame.K_UP and player.state in NEG:                    
+                        player.jump()
+                        player.state = JUMP_LEFT
             
-            # Verifica se soltou alguma tecla.
-            if event.type == pygame.KEYUP:
-                # Dependendo da tecla, altera a velocidade.
-                if event.key == pygame.K_LEFT:
-                    player.speedx = 0                    
-                    player.state = IDLE_LEFT
-                elif event.key == pygame.K_RIGHT:
-                    player.speedx = 0                    
-                    player.state = IDLE
+                # Verifica se apertou alguma tecla.
+                if event.type == pygame.KEYDOWN:
+                    # Dependendo da tecla, altera a velocidade.
+                    if event.key == pygame.K_LEFT:
+                        player.speedx = -5
+                        player.state = LEFT
+                    elif event.key == pygame.K_RIGHT:
+                        player.speedx = 5
+                        player.state = RIGHT
+                    # Se for um espaço atira!
+                    if event.key == pygame.K_SPACE:
+                        bullet = Bullet(player.rect.centerx, player.rect.top, blocks, mob)
+                        all_sprites.add(bullet)
+                        bullets.add(bullet)
+                        pew_sound.play()                    
+                
+                # Verifica se soltou alguma tecla.
+                if event.type == pygame.KEYUP:
+                    # Dependendo da tecla, altera a velocidade.
+                    if event.key == pygame.K_LEFT:
+                        player.speedx = 0                    
+                        player.state = IDLE_LEFT
+                    elif event.key == pygame.K_RIGHT:
+                        player.speedx = 0                    
+                        player.state = IDLE
                     
         # Depois de processar os eventos.
         # Atualiza a acao de cada sprite.
@@ -940,7 +977,11 @@ def game_screen(screen):
             # O meteoro e destruido e precisa ser recriado
             grunt_sound.play()
             vida -= 1
-       
+        hits = pygame.sprite.spritecollide(player, ices, True, pygame.sprite.collide_mask) 
+        for hit in hits: #Pode haver mais de um 
+            grunt_sound.play()
+            player.freeze()
+            
         # Verifica se caiu da tela
         if player.rect.y > 700 or vida == 0:
             pygame.mixer.music.stop()
@@ -949,7 +990,7 @@ def game_screen(screen):
             screen.fill(BLACK)
             screen.blit(game_over,[0,0])
             pygame.display.update()
-            time.sleep(10)
+            time.sleep(5)
             
             running = False
         
