@@ -720,11 +720,14 @@ boss = [Boss(row, column, blocks)]
 # Cria barra de vida. O construtor será chamado automaticamente.
 healthbar = HealthBar()
 
+#lobosster = pygame.image.load(path.join(img_dir, "health(1).png")).convert()
+
 # Cria um grupo de sprites e adiciona Jack.
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 all_sprites.add(boss)
 all_sprites.add(healthbar)
+#all_sprites.add(lobosster)
 
 # Cria tiles de acordo com o mapa
 for row in range(len(MAP1)):
