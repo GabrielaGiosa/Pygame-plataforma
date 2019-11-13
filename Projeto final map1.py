@@ -875,6 +875,7 @@ def game_screen(screen):
                     bullet = Bullet(player.rect.centerx, player.rect.top, blocks, mob)
                     all_sprites.add(bullet)
                     bullets.add(bullet)
+		    pew_sound.stop()  
                     pew_sound.play()                    
             
             # Verifica se soltou alguma tecla.

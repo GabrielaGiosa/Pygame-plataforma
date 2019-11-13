@@ -701,6 +701,7 @@ background_rect = background.get_rect()
 pygame.mixer.music.load(path.join(snd_dir, 'the final boss.ogg'))
 pygame.mixer.music.set_volume(0.7)
 game_over_sound = pygame.mixer.Sound(path.join(snd_dir, 'game_over_bad_chest.wav'))
+pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
 laugh_sound = pygame.mixer.Sound(path.join(snd_dir, 'laugh-evil-1.ogg'))
 grunt_sound = pygame.mixer.Sound(path.join(snd_dir, 'grunt.wav'))  
 victory_sound = pygame.mixer.Sound(path.join(snd_dir, 'victory.ogg'))
@@ -743,6 +744,16 @@ rocks = pygame.sprite.Group()
 # Cria um grupo só de itens health
 healths = pygame.sprite.Group()
 
+def bosshealth(vida_boss):
+    
+    if vida_boss > 666:
+        vida_boss_color = GREEN
+    elif vida_boss > 333:
+        vida_boss_color = YELLOW
+    else:
+        vida_boss_color = RED
+    
+    pygame.draw.rect(screen, vida_boss_color, (WIDTH - vida_boss, 150, vida_boss, 5))
     
 # Comando para evitar travamentos.
 def game_screen(screen):
@@ -750,7 +761,7 @@ def game_screen(screen):
     # Loop principal.
     
     vida = 5
-    vida_boss = 100
+    vida_boss = 1000
     running = True
     pygame.mixer.music.play(loops=-1)
     last_laugh = 0
@@ -790,7 +801,7 @@ def game_screen(screen):
                     bullet = Bullet(player.rect.centerx, player.rect.top, blocks, boss[0])
                     all_sprites.add(bullet)
                     bullets.add(bullet)
-                    pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
+                    pew_sound.stop()
                     pew_sound.play()                    
             
             # Verifica se soltou alguma tecla.
@@ -824,7 +835,7 @@ def game_screen(screen):
             last_heal = now_heal
         
         # Quando jogar pedra
-        if boss[0].state == SHOOT_RIGHT and boss[0].frame == 7 or boss[0].state == SHOOT_LEFT and boss[0].frame == 7:
+        if boss[0].state == SHOOT_RIGHT and boss[0].frame == 9 or boss[0].state == SHOOT_LEFT and boss[0].frame == 9:
             r = random.randint(5, 10)
             if boss[0].fire == False:
                 for i in range (r):
@@ -841,7 +852,8 @@ def game_screen(screen):
         hits = pygame.sprite.spritecollide(boss[0], bullets, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
-            vida_boss -= 1
+
+            vida_boss -= 5
             if vida_boss == 0:
                 boss[0].kill()
         
@@ -911,6 +923,7 @@ def game_screen(screen):
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
+        bosshealth(vida_boss)
         all_sprites.draw(screen)
         
         # Depois de desenhar tudo, inverte o display.
