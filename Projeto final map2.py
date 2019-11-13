@@ -835,7 +835,7 @@ def game_screen(screen):
             last_heal = now_heal
         
         # Quando jogar pedra
-        if boss[0].state == SHOOT_RIGHT and boss[0].frame == 7 or boss[0].state == SHOOT_LEFT and boss[0].frame == 7:
+        if boss[0].state == SHOOT_RIGHT and boss[0].frame == 9 or boss[0].state == SHOOT_LEFT and boss[0].frame == 9:
             r = random.randint(5, 10)
             if boss[0].fire == False:
                 for i in range (r):
