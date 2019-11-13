@@ -71,7 +71,7 @@ MAP1 = [
     [],    
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
     [],    
-    [BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY],
+    [BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY],
     [],    
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],    
     [],
@@ -854,7 +854,7 @@ def game_screen(screen):
     
     # Loop principal.
     
-    vida = 3
+    vida = 100
     vida_mob = 10
     running = True
     pygame.mixer.music.play(loops=-1)
@@ -909,14 +909,6 @@ def game_screen(screen):
             if event.type == pygame.QUIT:
                 running = False
                 
-            # Verifica se pulou
-            if event.type == pygame.KEYDOWN:                
-                if event.key == pygame.K_UP and player.state in POS:                    
-                    player.jump()
-                    player.state = JUMP
-                elif event.key == pygame.K_UP and player.state in NEG:                    
-                    player.jump()
-                    player.state = JUMP_LEFT
             
             if player.state != ICED and player.state != ICED_LEFT:  
                 # Verifica se pulou
@@ -937,6 +929,12 @@ def game_screen(screen):
                     elif event.key == pygame.K_RIGHT:
                         player.speedx = 5
                         player.state = RIGHT
+                    if event.key == pygame.K_UP and player.state in POS:                    
+                        player.jump()
+                        player.state = JUMP
+                    elif event.key == pygame.K_UP and player.state in NEG:                    
+                        player.jump()
+                        player.state = JUMP_LEFT
                     # Se for um espaço atira!
                     if event.key == pygame.K_SPACE:
                         bullet = Bullet(player.rect.centerx, player.rect.top, blocks, mob)
