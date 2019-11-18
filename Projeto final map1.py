@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Importando as bibliotecas necessárias.
-import pygame, time
+import pygame, time, math
 from os import path
 #from pygame_functions import *
 
@@ -78,6 +78,13 @@ MAP1 = [
     [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY,EMPTY, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK]
     ]
 
+def rot_center(image, angle):
+    rot_image = pygame.transform.rotate(image, angle)
+    return rot_image
+
+def rot_center2(image, angle2):
+    rot_image = pygame.transform.rotate(image, angle2)
+    return rot_image
 
 
 
@@ -561,7 +568,7 @@ class Mob(pygame.sprite.Sprite):
 class Arrow(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y, speedx, speedy):
+    def __init__(self, x, y, speedx, speedy, angle):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -569,6 +576,7 @@ class Arrow(pygame.sprite.Sprite):
         # Carregando a imagem de fundo.
         arrow_img = pygame.image.load(path.join(img_dir, "arrow.png")).convert()
         self.image = pygame.transform.scale(arrow_img,(30,5))
+        self.image = rot_center(self.image, angle)
         
         # Arrumando tamanho da imagem
         
@@ -731,7 +739,7 @@ class Magician(pygame.sprite.Sprite):
 class Ice(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y, speedx, speedy):
+    def __init__(self, x, y, speedx, speedy, angle2):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -739,6 +747,7 @@ class Ice(pygame.sprite.Sprite):
         # Carregando a imagem de fundo.
         arrow_img = pygame.image.load(path.join(img_dir, "ice spell.png")).convert()
         self.image = pygame.transform.scale(arrow_img,(15,14))
+        self.image = rot_center2(self.image, angle2)
         
         # Arrumando tamanho da imagem
         
@@ -883,8 +892,12 @@ def game_screen(screen):
                     Sy = -10*dy/d
                 Sx = 10*dx/d
                 Sy = 10*dy/d
+                angle = math.atan(Sy/Sx)
+                angle = -(math.degrees(angle))
 
-                arrow = Arrow(m.rect.left, m.rect.centery, Sx, Sy)
+                
+
+                arrow = Arrow(m.rect.left, m.rect.centery, Sx, Sy, angle)
                 all_sprites.add(arrow)
                 arrows.add(arrow)
                 arrow_sound.play()
@@ -900,11 +913,13 @@ def game_screen(screen):
                 if dy2 < 0:
                     Sy2 = -10*dy2/d2
                 Sx2 = 10*dx2/d2
-                Sy2 = 10*dy2/d2                
+                Sy2 = 10*dy2/d2  
+                angle2 = math.atan(Sy2/Sx2)
+                angle2 = -(math.degrees(angle2))
 
 
                 
-                ice = Ice(mg.rect.right, mg.rect.centery, Sx2, Sy2)
+                ice = Ice(mg.rect.right, mg.rect.centery, Sx2, Sy2, angle2)
                 all_sprites.add(ice)
                 ices.add(ice) 
                 
