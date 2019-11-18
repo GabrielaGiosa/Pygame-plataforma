@@ -71,7 +71,7 @@ MAP1 = [
     [],    
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
     [],    
-    [BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY],
+    [BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY],
     [],    
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],    
     [],
@@ -479,10 +479,10 @@ class Mob(pygame.sprite.Sprite):
         # Guarda o grupo de blocos para tratar as colisões
         self.blocks = blocks
         self.fire = fire
-        
+        self.vida = 10
         # Coloca no lugar inicial definido em x, y do constutor
-        self.rect.bottom = y + 300
-        self.rect.centerx = x + 1200
+        self.rect.bottom = y
+        self.rect.centerx = x
         self.speedx = 0
         self.speedy = 0
         
@@ -829,16 +829,25 @@ mob = pygame.sprite.Group()
 mag = pygame.sprite.Group() 
 
 # Cria i mobs e adiciona no grupo
-for i in range(1):
-    m = Mob(row, column, blocks, Arrow)
+xs = [1100,1100,1100]
+ys = [700,500,50]
+for i in range (len(xs)): 
+    x = xs[i]
+    y = ys[i] 
+    m = Mob(x,y,blocks,Ice )
     all_sprites.add(m)
     mob.add(m)
     
 # Cria x magos e adiciona o grupo 
-for x in range(1):
-    mg = Magician(row, column, blocks, Ice)
-    all_sprites.add(mg)
-    mag.add(mg)
+xs = [20,20,20]
+ys = [700,500,50]
+for i in range(len(xs)):
+    x = xs[i]
+    y = ys[i] 
+    m = Magician(x,y, blocks, Ice)
+    all_sprites.add(m)
+    mag.add(m) 
+    
 
 # Cria um grupo para tiros
 bullets = pygame.sprite.Group()
@@ -855,7 +864,7 @@ def game_screen(screen):
     # Loop principal.
     
     vida = 100
-    vida_mob = 10
+    
     running = True
     pygame.mixer.music.play(loops=-1)
     while running:
@@ -909,6 +918,14 @@ def game_screen(screen):
             if event.type == pygame.QUIT:
                 running = False
                 
+            # Verifica se pulou
+            if event.type == pygame.KEYDOWN:                
+                if event.key == pygame.K_UP and player.state in POS:                    
+                    player.jump()
+                    player.state = JUMP
+                elif event.key == pygame.K_UP and player.state in NEG:                    
+                    player.jump()
+                    player.state = JUMP_LEFT
             
             if player.state != ICED and player.state != ICED_LEFT:  
                 # Verifica se pulou
@@ -929,12 +946,6 @@ def game_screen(screen):
                     elif event.key == pygame.K_RIGHT:
                         player.speedx = 5
                         player.state = RIGHT
-                    if event.key == pygame.K_UP and player.state in POS:                    
-                        player.jump()
-                        player.state = JUMP
-                    elif event.key == pygame.K_UP and player.state in NEG:                    
-                        player.jump()
-                        player.state = JUMP_LEFT
                     # Se for um espaço atira!
                     if event.key == pygame.K_SPACE:
                         bullet = Bullet(player.rect.centerx, player.rect.top, blocks, mob)
@@ -958,13 +969,13 @@ def game_screen(screen):
         
         # Verifica se houve colisão entre tiro e meteoro
         hits = pygame.sprite.groupcollide(mob, bullets, False, True, pygame.sprite.collide_mask)
-        for hit in hits: # Pode haver mais de um
+        for m in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
             die_sound.play()
-            vida_mob -= 1
-            if vida_mob == 0:
+            m.vida -= 1
+            if m.vida == 0:
                 m.state = DEAD
-                print(m.frame)
+                
         for m in mob:
             if m.morre == True:
                 m.kill()
