@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Importando as bibliotecas necessárias.
-import pygame, time
+import pygame, time, math
 from os import path
 #from pygame_functions import *
 
@@ -71,13 +71,20 @@ MAP1 = [
     [],    
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],
     [],    
-    [BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY],
+    [BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY],
     [],    
     [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK],    
     [],
     [BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, EMPTY, EMPTY, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, EMPTY,EMPTY, BLOCK, BLOCK, BLOCK, BLOCK,BLOCK, BLOCK, BLOCK, BLOCK, BLOCK, BLOCK]
     ]
 
+def rot_center(image, angle):
+    rot_image = pygame.transform.rotate(image, angle)
+    return rot_image
+
+def rot_center2(image, angle2):
+    rot_image = pygame.transform.rotate(image, angle2)
+    return rot_image
 
 
 
@@ -479,10 +486,10 @@ class Mob(pygame.sprite.Sprite):
         # Guarda o grupo de blocos para tratar as colisões
         self.blocks = blocks
         self.fire = fire
-        
+        self.vida = 10
         # Coloca no lugar inicial definido em x, y do constutor
-        self.rect.bottom = y + 300
-        self.rect.centerx = x + 1200
+        self.rect.bottom = y
+        self.rect.centerx = x
         self.speedx = 0
         self.speedy = 0
         
@@ -561,7 +568,7 @@ class Mob(pygame.sprite.Sprite):
 class Arrow(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y, speedx, speedy):
+    def __init__(self, x, y, speedx, speedy, angle):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -569,6 +576,7 @@ class Arrow(pygame.sprite.Sprite):
         # Carregando a imagem de fundo.
         arrow_img = pygame.image.load(path.join(img_dir, "arrow.png")).convert()
         self.image = pygame.transform.scale(arrow_img,(30,5))
+        self.image = rot_center(self.image, angle)
         
         # Arrumando tamanho da imagem
         
@@ -731,7 +739,7 @@ class Magician(pygame.sprite.Sprite):
 class Ice(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y, speedx, speedy):
+    def __init__(self, x, y, speedx, speedy, angle2):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -739,6 +747,7 @@ class Ice(pygame.sprite.Sprite):
         # Carregando a imagem de fundo.
         arrow_img = pygame.image.load(path.join(img_dir, "ice spell.png")).convert()
         self.image = pygame.transform.scale(arrow_img,(15,14))
+        self.image = rot_center2(self.image, angle2)
         
         # Arrumando tamanho da imagem
         
@@ -830,16 +839,25 @@ mob = pygame.sprite.Group()
 mag = pygame.sprite.Group() 
 
 # Cria i mobs e adiciona no grupo
-for i in range(1):
-    m = Mob(row, column, blocks, Arrow)
+xs = [1100,1100,1100]
+ys = [700,500,50]
+for i in range (len(xs)): 
+    x = xs[i]
+    y = ys[i] 
+    m = Mob(x,y,blocks,Ice )
     all_sprites.add(m)
     mob.add(m)
     
 # Cria x magos e adiciona o grupo 
-for x in range(1):
-    mg = Magician(row, column, blocks, Ice)
-    all_sprites.add(mg)
-    mag.add(mg)
+xs = [20,20,20]
+ys = [700,500,50]
+for i in range(len(xs)):
+    x = xs[i]
+    y = ys[i] 
+    m = Magician(x,y, blocks, Ice)
+    all_sprites.add(m)
+    mag.add(m) 
+    
 
 # Cria um grupo para tiros
 bullets = pygame.sprite.Group()
@@ -856,7 +874,7 @@ def game_screen(screen):
     # Loop principal.
     
     vida = 100
-    vida_mob = 10
+    
     running = True
     pygame.mixer.music.play(loops=-1)
     while running:
@@ -875,8 +893,12 @@ def game_screen(screen):
                     Sy = -10*dy/d
                 Sx = 10*dx/d
                 Sy = 10*dy/d
+                angle = math.atan(Sy/Sx)
+                angle = -(math.degrees(angle))
 
-                arrow = Arrow(m.rect.left, m.rect.centery, Sx, Sy)
+                
+
+                arrow = Arrow(m.rect.left, m.rect.centery, Sx, Sy, angle)
                 all_sprites.add(arrow)
                 arrows.add(arrow)
                 arrow_sound.play()
@@ -892,11 +914,13 @@ def game_screen(screen):
                 if dy2 < 0:
                     Sy2 = -10*dy2/d2
                 Sx2 = 10*dx2/d2
-                Sy2 = 10*dy2/d2                
+                Sy2 = 10*dy2/d2  
+                angle2 = math.atan(Sy2/Sx2)
+                angle2 = -(math.degrees(angle2))
 
 
                 
-                ice = Ice(mg.rect.right, mg.rect.centery, Sx2, Sy2)
+                ice = Ice(mg.rect.right, mg.rect.centery, Sx2, Sy2, angle2)
                 all_sprites.add(ice)
                 ices.add(ice) 
                 
@@ -910,6 +934,14 @@ def game_screen(screen):
             if event.type == pygame.QUIT:
                 running = False
                 
+            # Verifica se pulou
+            if event.type == pygame.KEYDOWN:                
+                if event.key == pygame.K_UP and player.state in POS:                    
+                    player.jump()
+                    player.state = JUMP
+                elif event.key == pygame.K_UP and player.state in NEG:                    
+                    player.jump()
+                    player.state = JUMP_LEFT
             
             if player.state != ICED and player.state != ICED_LEFT:  
                 # Verifica se pulou
@@ -930,12 +962,6 @@ def game_screen(screen):
                     elif event.key == pygame.K_RIGHT:
                         player.speedx = 5
                         player.state = RIGHT
-                    if event.key == pygame.K_UP and player.state in POS:                    
-                        player.jump()
-                        player.state = JUMP
-                    elif event.key == pygame.K_UP and player.state in NEG:                    
-                        player.jump()
-                        player.state = JUMP_LEFT
                     # Se for um espaço atira!
                     if event.key == pygame.K_SPACE:
                         bullet = Bullet(player.rect.centerx, player.rect.top, blocks, mob)
@@ -960,13 +986,13 @@ def game_screen(screen):
         
         # Verifica se houve colisão entre tiro e meteoro
         hits = pygame.sprite.groupcollide(mob, bullets, False, True, pygame.sprite.collide_mask)
-        for hit in hits: # Pode haver mais de um
+        for m in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
             die_sound.play()
-            vida_mob -= 1
-            if vida_mob == 0:
+            m.vida -= 1
+            if m.vida == 0:
                 m.state = DEAD
-                print(m.frame)
+                
         for m in mob:
             if m.morre == True:
                 m.kill()
