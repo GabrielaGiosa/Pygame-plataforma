@@ -802,6 +802,7 @@ arrow_sound = pygame.mixer.Sound(path.join(snd_dir, 'Archers-shooting.ogg'))
 die_sound = pygame.mixer.Sound(path.join(snd_dir, 'Hurting The Robot.wav'))
 grunt_sound = pygame.mixer.Sound(path.join(snd_dir, 'grunt.wav'))  
 victory_sound = pygame.mixer.Sound(path.join(snd_dir, 'victory.ogg'))
+ice_sound = pygame.mixer.Sound(path.join(snd_dir, 'ice_sound.ogg'))
 
 # Sprites de block são aqueles que impedem o movimento do jogador
 blocks = pygame.sprite.Group()
@@ -940,6 +941,7 @@ def game_screen(screen):
                         bullet = Bullet(player.rect.centerx, player.rect.top, blocks, mob)
                         all_sprites.add(bullet)
                         bullets.add(bullet)
+                        pew_sound.stop() 
                         pew_sound.play()                    
                 
                 # Verifica se soltou alguma tecla.
@@ -977,7 +979,7 @@ def game_screen(screen):
             vida -= 1
         hits = pygame.sprite.spritecollide(player, ices, True, pygame.sprite.collide_mask) 
         for hit in hits: #Pode haver mais de um 
-            grunt_sound.play()
+            ice_sound.play()
             player.freeze()
             
         # Verifica se caiu da tela
