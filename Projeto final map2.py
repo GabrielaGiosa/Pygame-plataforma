@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Importando as bibliotecas necessárias.
 import pygame, time, random
 from os import path
@@ -32,6 +30,9 @@ JUMP_SIZE = 25
 # Define a altura do chão
 GROUND = HEIGHT * 5 // 6
 
+# Define global game over
+game_over = False
+
 # Define ações do player
 IDLE = 0
 RIGHT = 1
@@ -50,12 +51,19 @@ WALK_LEFT = 9
 SHOOT_RIGHT = 10
 SHOOT_LEFT = 11
 SHOOT = [SHOOT_RIGHT, SHOOT_LEFT]
+
+# Constantes tela
+QUIT = 0
+GAME_SCREEN = 1
+BOSS_SCREEN = 2
+GAME_OVER = 3
+
 # Define os tipos de tiles
 BLOCK = 0
 EMPTY = -1
 
 # Define o mapa com os tipos de tiles
-MAP1 = [   
+MAP2 = [   
         [],    
         [],
         [],
@@ -85,12 +93,13 @@ class HealthBar(pygame.sprite.Sprite):
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
         
-        self.healthsheet =    [pygame.image.load(path.join(img_dir, "health(1).png")).convert(),
-                          pygame.image.load(path.join(img_dir, "health(2).png")).convert(),
-                          pygame.image.load(path.join(img_dir, "health(3).png")).convert(),
-                          pygame.image.load(path.join(img_dir, "health(4).png")).convert(),
-                          pygame.image.load(path.join(img_dir, "health(5).png")).convert()
-                          ]
+        self.healthsheet =   [pygame.image.load(path.join(img_dir, "health(0).png")).convert(),
+                              pygame.image.load(path.join(img_dir, "health(1).png")).convert(),
+                              pygame.image.load(path.join(img_dir, "health(2).png")).convert(),
+                              pygame.image.load(path.join(img_dir, "health(3).png")).convert(),
+                              pygame.image.load(path.join(img_dir, "health(4).png")).convert(),
+                              pygame.image.load(path.join(img_dir, "health(5).png")).convert()
+                              ]
         
         i = 0
         while i < len(self.healthsheet):
@@ -98,7 +107,7 @@ class HealthBar(pygame.sprite.Sprite):
             self.image.set_colorkey(BLACK)
             i += 1
         
-        self.frame = 4
+        self.frame = 5
         self.image = self.healthsheet[self.frame]
         
         # Detalhes sobre o posicionamento.
@@ -110,6 +119,8 @@ class HealthBar(pygame.sprite.Sprite):
         self.rect.y = - 30
         
     def update(self):
+        if self.frame < 0:
+            self.frame = 0
         self.image = self.healthsheet[self.frame]
 
 # Class que representa os blocos do cenário
@@ -401,7 +412,7 @@ class Player(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y, blocks, boss):
+    def __init__(self, x, y, blocks, boss, player):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -632,7 +643,7 @@ class Boss(pygame.sprite.Sprite):
 class Rock(pygame.sprite.Sprite):
     
     # Construtor da classe.
-    def __init__(self, x, y, player):
+    def __init__(self, x, y, boss):
         
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
@@ -646,17 +657,14 @@ class Rock(pygame.sprite.Sprite):
         
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
-        
-        # Guarda o grupo de blocos para tratar as colisões
-        self.player = player
 
         # Coloca no lugar inicial definido em x, y do constutor
-        if boss[0].state == SHOOT_RIGHT:
+        if boss.state == SHOOT_RIGHT:
             self.rect.bottom = y + 200
             self.rect.centerx = x + 30
             self.speedx = random.randint(5, 18)
             self.speedy = random.randint(-80, -30)
-        if boss[0].state == SHOOT_LEFT:
+        if boss.state == SHOOT_LEFT:
             self.rect.bottom = y + 200
             self.rect.centerx = x - 30
             self.speedx = random.randint(-18, -5)
@@ -681,17 +689,15 @@ pygame.mixer.init()
 
 
 # Tamanho da tela.
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT),pygame.FULLSCREEN)
 
 # Nome do jogo
-pygame.display.set_caption("Jack")
+pygame.display.set_caption("Tales of Jack")
 
 # Variável para o ajuste de velocidade
 clock = pygame.time.Clock()
 
 
-row = len(MAP1)
-column = len(MAP1[0])
 
 # Carrega o fundo do jogo
 background = pygame.image.load(path.join(img_dir, 'Full Moon - background.png')).convert()
@@ -708,67 +714,89 @@ victory_sound = pygame.mixer.Sound(path.join(snd_dir, 'victory.ogg'))
 boom_sound = pygame.mixer.Sound(path.join(snd_dir, 'boom.ogg'))
 heal_sound = pygame.mixer.Sound(path.join(snd_dir, 'healspell.ogg'))
 
-# Sprites de block são aqueles que impedem o movimento do jogador
-blocks = pygame.sprite.Group()
-
-# Cria Jack. O construtor será chamado automaticamente.
-player = Player(row, column, blocks)
-
-# Cria Boss. O construtor será chamado automaticamente.
-boss = [Boss(row, column, blocks)]
-
-# Cria barra de vida. O construtor será chamado automaticamente.
-healthbar = HealthBar()
-
-#lobosster = pygame.image.load(path.join(img_dir, "health(1).png")).convert()
-
-# Cria um grupo de sprites e adiciona Jack.
-all_sprites = pygame.sprite.Group()
-all_sprites.add(player)
-all_sprites.add(boss)
-all_sprites.add(healthbar)
-#all_sprites.add(lobosster)
-
-# Cria tiles de acordo com o mapa
-for row in range(len(MAP1)):
-    for column in range(len(MAP1[row])):
-        tile_type = MAP1[row][column]
-        if tile_type == BLOCK:
-            tile = Tile(row, column)
-            all_sprites.add(tile)
-            blocks.add(tile)
-
-# Cria um grupo para tiros
-bullets = pygame.sprite.Group()
-
-# Cria um grupo para flechas
-rocks = pygame.sprite.Group()
-
-# Cria um grupo só de itens health
-healths = pygame.sprite.Group()
-
 def bosshealth(vida_boss):
     
-    if vida_boss > 666:
+    if vida_boss > 500:
         vida_boss_color = GREEN
-    elif vida_boss > 333:
+    elif vida_boss > 250:
         vida_boss_color = YELLOW
     else:
         vida_boss_color = RED
     
-    pygame.draw.rect(screen, vida_boss_color, (WIDTH - vida_boss, 150, vida_boss, 5))
+    pygame.draw.rect(screen, vida_boss_color, (WIDTH - vida_boss, 150, vida_boss, 10))
     
+name_boss = pygame.image.load(path.join(img_dir, "lobosster.png")).convert()
+quit_button = pygame.image.load(path.join(img_dir, "quit.png")).convert()
+retry_button = pygame.image.load(path.join(img_dir, "retry.png")).convert()
+
+def retry():
+    global HEIGHT
+    x =  (220)
+    y = (HEIGHT * 0.05)
+    retry_button.set_colorkey(WHITE)
+    screen.blit(retry_button, (x,y))
+    
+def leave():
+    global HEIGHT
+    x =  (880)
+    y = (HEIGHT * 0.05)
+    quit_button.set_colorkey(WHITE)
+    screen.blit(quit_button, (x,y))
+
+def lobosster():
+    global WIDTH, HEIGHT
+    x =  (WIDTH - 160)
+    y = (HEIGHT * 0.14)
+    name_boss.set_colorkey(BLACK)
+    screen.blit(name_boss, (x,y))
+
 # Comando para evitar travamentos.
-def game_screen(screen):
+def boss_screen(screen):
     
     # Loop principal.
     
     vida = 5
-    vida_boss = 1000
+    vida_boss = 750
     running = True
     pygame.mixer.music.play(loops=-1)
     last_laugh = 0
-    last_heal = 0
+    last_heal = 0        
+    row = len(MAP2)
+    column = len(MAP2[0])
+        # Sprites de block são aqueles que impedem o movimento do jogador
+    blocks = pygame.sprite.Group()
+    
+    # Cria Jack. O construtor será chamado automaticamente.
+    player = Player(row, column, blocks)
+    
+    # Cria Boss. O construtor será chamado automaticamente.
+    boss = [Boss(row, column, blocks)]
+    
+    # Cria barra de vida. O construtor será chamado automaticamente.
+    healthbar = HealthBar()
+    
+    # Cria um grupo de sprites e adiciona Jack.
+    all_sprites = pygame.sprite.Group()
+    all_sprites.add(player)
+    all_sprites.add(boss)
+    all_sprites.add(healthbar)
+    # Cria tiles de acordo com o mapa
+    for row in range(len(MAP2)):
+        for column in range(len(MAP2[row])):
+            tile_type = MAP2[row][column]
+            if tile_type == BLOCK:
+                tile = Tile(row, column)
+                all_sprites.add(tile)
+                blocks.add(tile)
+    
+    # Cria um grupo para tiros
+    bullets = pygame.sprite.Group()
+    
+    # Cria um grupo para flechas
+    rocks = pygame.sprite.Group()
+    
+    # Cria um grupo só de itens health
+    healths = pygame.sprite.Group()
     while running:
         
         # Ajusta a velocidade do jogo.
@@ -779,7 +807,7 @@ def game_screen(screen):
             
             # Verifica se foi fechado.
             if event.type == pygame.QUIT:
-                running = False
+                return QUIT
                 
             # Verifica se pulou
             if event.type == pygame.KEYDOWN:                
@@ -801,7 +829,7 @@ def game_screen(screen):
                     player.state = RIGHT
                 # Se for um espaço atira!
                 if event.key == pygame.K_SPACE:
-                    bullet = Bullet(player.rect.centerx, player.rect.top, blocks, boss[0])
+                    bullet = Bullet(player.rect.centerx, player.rect.top, blocks, boss[0], player)
                     all_sprites.add(bullet)
                     bullets.add(bullet)
                     pew_sound.stop()
@@ -855,8 +883,7 @@ def game_screen(screen):
         hits = pygame.sprite.spritecollide(boss[0], bullets, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
-
-            vida_boss -= 5
+            vida_boss -= 3
             if vida_boss == 0:
                 boss[0].kill()
         
@@ -901,17 +928,10 @@ def game_screen(screen):
             heal_sound.play()
             
         # Verifica se morreu
-        if vida == 0:
+        if vida <= 0:
             pygame.mixer.music.stop()
-            game_over = pygame.image.load(path.join(img_dir, "Game-over-2.png")).convert()
-            game_over_sound.play()    
-            screen.fill(BLACK)
-            screen.blit(game_over,[0,0])
-            pygame.display.update()
-            time.sleep(5)
-            
-            running = False
-        
+            return GAME_OVER
+
         elif vida_boss == 0:
             pygame.mixer.music.stop()
             victory = pygame.image.load(path.join(img_dir, "victory.jpg")).convert()
@@ -919,21 +939,46 @@ def game_screen(screen):
             screen.blit(victory,[0,0])
             pygame.display.update()
             victory_sound.play()    
-            time.sleep(10)
-            
-            running = False
-            
+            time.sleep(10)           
+            return QUIT
+          
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
+        lobosster()
         bosshealth(vida_boss)
-        all_sprites.draw(screen)
-        
+        all_sprites.draw(screen)       
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
-        
+
+def game_over(screen, tela_anterior):
+    running = True
+    game_over_sound.play()  
+    game_over = pygame.image.load(path.join(img_dir, "Game-over-2.png")).convert()
+    while running:        
+        # Ajusta a velocidade do jogo.
+        clock.tick(FPS)
+        screen.fill(BLACK)
+        screen.blit(game_over,[77,0])
+        retry()
+        leave()
+        pygame.display.update()
+        for event in pygame.event.get():
+            pos = pygame.mouse.get_pos()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if pos[0] > 230 and pos[0] < 420 and pos[1] > 35 and pos[1] < 180:
+                    return tela_anterior
+                elif pos[0] > 890 and pos[0] < 1110 and pos[1] > 35 and pos[1] < 180:
+                    return QUIT
+
 try:
-    game_screen(screen)
-        
+    tela_anterior = -1
+    tela_atual = BOSS_SCREEN
+    while tela_atual != QUIT:
+        if tela_atual == BOSS_SCREEN:
+            tela_anterior = tela_atual
+            tela_atual = boss_screen(screen)         
+        elif tela_atual == GAME_OVER:
+            tela_atual = game_over(screen, tela_anterior)
 finally:
     pygame.quit()
