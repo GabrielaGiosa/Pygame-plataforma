@@ -315,8 +315,8 @@ class Player(pygame.sprite.Sprite):
         self.startfreeze_ticks = 0
         
     def freeze(self):  
-        if self.state != ICED or self.state != ICED_LEFT:            
-            self.prevstate = -2
+        if self.state != ICED and self.state != ICED_LEFT:            
+            self.prevstate = self.state
             if self.prevstate == RIGHT or self.prevstate == JUMP:
                 self.prevstate = IDLE
                 self.speedx = 0
@@ -592,7 +592,7 @@ class Mob(pygame.sprite.Sprite):
         # Guarda o grupo de blocos para tratar as colisÃµes
         self.blocks = blocks
         self.fire = fire
-        self.vida = 1
+        self.vida = 5
         # Coloca no lugar inicial definido em x, y do constutor
         self.rect.bottom = y
         self.rect.centerx = x
@@ -770,7 +770,7 @@ class Magician(pygame.sprite.Sprite):
         # Inicializa o primeiro quadro da animaÃ§Ã£o
         self.frame = 0
         self.image = self.animation[self.frame]
-        self.vida = 1
+        self.vida = 5
 
         
         # Detalhes sobre o posicionamento.
@@ -1117,6 +1117,9 @@ def game_screen(screen):
             # Verifica se foi fechado.
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:       
+                if event.key == pygame.K_q:
+                    return QUIT
             
             if player.state != ICED and player.state != ICED_LEFT:  
                 # Verifica se pulou
