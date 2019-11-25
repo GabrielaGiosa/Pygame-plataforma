@@ -51,6 +51,10 @@ NEG = [LEFT, JUMP_LEFT, FALL_LEFT, IDLE_LEFT, ICED_LEFT]
 ATTACK = 8
 DEAD = 9
 
+# Define acoes do magician
+ATTACK_ICE = 10
+DIE = 11
+
 # Define os tipos de tiles
 BLOCK = 0
 EMPTY = -1
@@ -311,7 +315,7 @@ class Player(pygame.sprite.Sprite):
         self.startfreeze_ticks = 0
         
     def freeze(self):  
-        if self.state != ICED and self.state != ICED_LEFT:            
+        if self.state != ICED or self.state != ICED_LEFT:            
             self.prevstate = -2
             if self.prevstate == RIGHT or JUMP:
                 self.prevstate = IDLE
@@ -738,6 +742,13 @@ class Magician(pygame.sprite.Sprite):
                           pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_007.png" )).convert(),True, False),
                           pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_008.png" )).convert(),True, False),
                           pygame.transform.flip(pygame.image.load(path.join(img_dir,"Attack 2_entity_000_Attack 2_009.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"ad_entity_000_Dead_000.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"ad_entity_000_Dead_001.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"ad_entity_000_Dead_002.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"ad_entity_000_Dead_003.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"ad_entity_000_Dead_004.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"ad_entity_000_Dead_005.png" )).convert(),True, False),
+                          pygame.transform.flip(pygame.image.load(path.join(img_dir,"ad_entity_000_Dead_006.png" )).convert(),True, False),
                            ]
         i = 0
         while i < len(spritesheetmag):
@@ -746,17 +757,21 @@ class Magician(pygame.sprite.Sprite):
             self.image.set_colorkey(BLACK)
             i += 1
          # Carregando a imagem de fundo.
-        self.animations = {ATTACK:spritesheetmag[0:22]}
+        self.animations = {ATTACK:spritesheetmag[0:22],
+                           DIE:spritesheetmag[22:29]}
         
         
         # Define estado atual (que define qual animaÃ§Ã£o deve ser mostrada)
         self.state = ATTACK
+        self.morre = False
+
         # Define animaÃ§Ã£o atual
         self.animation = self.animations[self.state]
         # Inicializa o primeiro quadro da animaÃ§Ã£o
         self.frame = 0
         self.image = self.animation[self.frame]
         self.vida = 1
+
         
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
@@ -787,6 +802,9 @@ class Magician(pygame.sprite.Sprite):
 
         # Verifica quantos ticks se passaram desde a ultima mudanÃ§a de frame.
         elapsed_ticks = now - self.last_update
+        
+        if self.state == DIE and self.frame == 5:
+            self.morre = True
 
         # Se jÃ¡ estÃ¡ na hora de mudar de imagem...
         if elapsed_ticks > self.frame_ticks:
@@ -1170,7 +1188,11 @@ def game_screen(screen):
             die_sound.play()
             mg.vida -= 1
             if mg.vida == 0:
+                mg.state = DIE
+        for mg in mag:
+            if mg.morre == True:
                 mg.kill()
+            
     
         hits = pygame.sprite.spritecollide(player, arrows, True, pygame.sprite.collide_mask)
         for hit in hits: # Pode haver mais de um
