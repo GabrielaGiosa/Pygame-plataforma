@@ -704,8 +704,8 @@ background = pygame.image.load(path.join(img_dir, 'Full Moon - background.png'))
 background_rect = background.get_rect()
 
 # Carrega os sons do jogo
-pygame.mixer.music.load(path.join(snd_dir, 'the final boss.ogg'))
-pygame.mixer.music.set_volume(0.7)
+#pygame.mixer.music.load(path.join(snd_dir, 'the final boss.ogg'))
+#pygame.mixer.music.set_volume(0.7)
 game_over_sound = pygame.mixer.Sound(path.join(snd_dir, 'game_over_bad_chest.wav'))
 pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
 laugh_sound = pygame.mixer.Sound(path.join(snd_dir, 'laugh-evil-1.ogg'))
@@ -748,13 +748,14 @@ def lobosster():
     x =  (WIDTH - 160)
     y = (HEIGHT * 0.14)
     name_boss.set_colorkey(BLACK)
-#    screen.blit(name_boss, (x,y))
+    screen.blit(name_boss, (x,y))
 
 # Comando para evitar travamentos.
 def boss_screen(screen):
     
     # Loop principal.
-    
+    pygame.mixer.music.load(path.join(snd_dir, 'the final boss.ogg'))
+    pygame.mixer.music.set_volume(0.7)
     vida = 5
     vida_boss = 750
     running = True
@@ -950,37 +951,3 @@ def boss_screen(screen):
         all_sprites.draw(screen)       
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
-
-def game_over(screen, tela_anterior):
-    running = True
-    game_over_sound.play()  
-    game_over = pygame.image.load(path.join(img_dir, "Game-over-2.png")).convert()
-    while running:        
-        # Ajusta a velocidade do jogo.
-        clock.tick(FPS)
-        screen.fill(BLACK)
-        screen.blit(game_over,[77,0])
-        retry()
-        leave()
-        pygame.display.update()
-        for event in pygame.event.get():
-            pos = pygame.mouse.get_pos()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if pos[0] > 230 and pos[0] < 420 and pos[1] > 35 and pos[1] < 180:
-                    return tela_anterior
-                elif pos[0] > 890 and pos[0] < 1110 and pos[1] > 35 and pos[1] < 180:
-                    return QUIT
-"""
-try:
-    tela_anterior = -1
-    tela_atual = TELA_AJUDA
-    while tela_atual != QUIT:
-        if tela_atual == BOSS_SCREEN:
-            tela_anterior = tela_atual
-            tela_atual = boss_screen(screen)         
-        elif tela_atual == GAME_OVER:
-            tela_atual = game_over(screen, tela_anterior)
-finally:
-    pygame.quit()
-"""
-

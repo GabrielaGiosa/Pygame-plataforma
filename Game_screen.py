@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 import pygame, math, random
 from os import path
-from Boss_screen import boss_screen
+from Boss_screen import *
+from Menu import *
 #from pygame_functions import *
 
 # Estabelece a pasta que contem as figuras.
 img_dir = path.join(path.dirname(__file__), 'imagens_rep')
 snd_dir = path.join(path.dirname(__file__), 'sons_rep')
-
 
 # Dados gerais do jogo.
 WIDTH = 1300 # Largura da tela
@@ -756,7 +756,7 @@ class Magician(pygame.sprite.Sprite):
         # Inicializa o primeiro quadro da animaÃ§Ã£o
         self.frame = 0
         self.image = self.animation[self.frame]
-        self.vida = 10
+        self.vida = 1
         
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
@@ -899,8 +899,6 @@ background = pygame.image.load(path.join(img_dir, 'Full Moon - background.png'))
 background_rect = background.get_rect()
 
 # Carrega os sons do jogo
-pygame.mixer.music.load(path.join(snd_dir, 'blackmist II.mp3'))
-pygame.mixer.music.set_volume(0.15)
 pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'shot.ogg'))
 game_over_sound = pygame.mixer.Sound(path.join(snd_dir, 'game_over_bad_chest.wav'))
 arrow_sound = pygame.mixer.Sound(path.join(snd_dir, 'Archers-shooting.ogg'))
@@ -910,6 +908,7 @@ victory_sound = pygame.mixer.Sound(path.join(snd_dir, 'victory.ogg'))
 ice_sound = pygame.mixer.Sound(path.join(snd_dir, 'ice_sound.ogg'))
 heal_sound = pygame.mixer.Sound(path.join(snd_dir, 'healspell.ogg'))
 door_sound = pygame.mixer.Sound(path.join(snd_dir, 'door.ogg'))
+click_sound = pygame.mixer.Sound(path.join(snd_dir, 'click.ogg'))
 
 # Classe Jogador que representa Jack
 class Door(pygame.sprite.Sprite):
@@ -974,6 +973,8 @@ def game_screen(screen):
     last_heal = 0
     door = Door()
     running = True
+    pygame.mixer.music.load(path.join(snd_dir, 'blackmist II.mp3'))
+    pygame.mixer.music.set_volume(0.15)
     pygame.mixer.music.play(loops=-1)
     # Sprites de block sÃ£o aqueles que impedem o movimento do jogador
     blocks = pygame.sprite.Group()
@@ -1199,6 +1200,7 @@ def game_screen(screen):
         hits = pygame.sprite.spritecollide(player, doors, True, pygame.sprite.collide_mask) 
         for hit in hits: #Pode haver mais de um 
             fade(WIDTH, HEIGHT)
+            pygame.mixer.music.stop()
             return BOSS_SCREEN
             
         # Verifica se caiu da tela
@@ -1234,80 +1236,25 @@ def game_over(screen, tela_anterior):
             pos = pygame.mouse.get_pos()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if pos[0] > 230 and pos[0] < 420 and pos[1] > 35 and pos[1] < 180:
+                    click_sound.play()
                     return tela_anterior
                 elif pos[0] > 890 and pos[0] < 1110 and pos[1] > 35 and pos[1] < 180:
+                    click_sound.play()
                     return QUIT
-
-def tela_inicial(screen):
-    background = pygame.image.load(path.join(img_dir, 'init.png')).convert()
-    background_rect = background.get_rect()
-    
-    running = True
-    
-    while running:
-        
-        # Ajusta a velocidade do jogo.
-        clock.tick(FPS)
-        
-        # Processa os eventos (mouse, teclado, botão, etc).
-        for event in pygame.event.get():
-            # Verifica se foi fechado.
-            pos = pygame.mouse.get_pos()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if pos[0] > 70 and pos[0] < 500 and pos[1] > 400 and pos[1] < 600:
-                    return GAME_SCREEN
-                elif pos[0] > 755 and pos[0] < 1200 and pos[1] > 400 and pos[1] < 600:
-                    return TELA_AJUDA
-                
-        screen.fill(BLACK)
-        screen.blit(background, background_rect)
-
-        # Depois de desenhar tudo, inverte o display.
-        pygame.display.flip()
-        
-        
-def tela_ajuda(screen):
-    background = pygame.image.load(path.join(img_dir, 'ajuda.png')).convert()
-    background_rect = background.get_rect()
-    
-    running = True
-    
-    while running:
-        
-        # Ajusta a velocidade do jogo.
-        clock.tick(FPS)
-        
-        # Processa os eventos (mouse, teclado, botão, etc).
-        for event in pygame.event.get():
-            # Verifica se foi fechado.
-            pos = pygame.mouse.get_pos()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if pos[0] > 1000 and pos[0] < 1300 and pos[1] > 580 and pos[1] < 700:
-                    return TELA_INICIAL
-                
-        screen.fill(BLACK)
-        screen.blit(background, background_rect)
-
-        # Depois de desenhar tudo, inverte o display.
-        pygame.display.flip()
-
-
-
-
 
 try:
     tela_anterior = -1
     tela_atual = TELA_INICIAL
     while tela_atual != QUIT:
-        if tela_atual == GAME_SCREEN:
-            tela_anterior = tela_atual
-            tela_atual = game_screen(screen)
-            
-        elif tela_atual == TELA_INICIAL:
+        if tela_atual == TELA_INICIAL:
             tela_atual = tela_inicial(screen)
         elif tela_atual == TELA_AJUDA:
             tela_atual = tela_ajuda(screen)
+        elif tela_atual == GAME_SCREEN:
+            tela_anterior = tela_atual
+            tela_atual = game_screen(screen)            
         elif tela_atual == BOSS_SCREEN:
+            tela_anterior = tela_atual
             tela_atual = boss_screen(screen)
         elif tela_atual == GAME_OVER:
             tela_atual = game_over(screen, tela_anterior)
