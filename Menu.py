@@ -41,9 +41,11 @@ click_sound = pygame.mixer.Sound(path.join(snd_dir, 'click.ogg'))
     
 def tela_inicial(screen):
     running = True
-    pygame.mixer.music.load(path.join(snd_dir, 'menu.mp3'))
-    pygame.mixer.music.set_volume(0.4)
-    pygame.mixer.music.play(loops=-1)
+    is_playing = pygame.mixer.music.get_busy()
+    if is_playing == False:
+        pygame.mixer.music.load(path.join(snd_dir, 'menu.mp3'))
+        pygame.mixer.music.set_volume(0.4)
+        pygame.mixer.music.play(loops=-1)
     while running:
         
         # Ajusta a velocidade do jogo.

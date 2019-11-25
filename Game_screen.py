@@ -317,10 +317,10 @@ class Player(pygame.sprite.Sprite):
     def freeze(self):  
         if self.state != ICED or self.state != ICED_LEFT:            
             self.prevstate = -2
-            if self.prevstate == RIGHT or JUMP:
+            if self.prevstate == RIGHT or self.prevstate == JUMP:
                 self.prevstate = IDLE
                 self.speedx = 0
-            elif self.prevstate == LEFT or JUMP_LEFT:
+            elif self.prevstate == LEFT or self.prevstate == JUMP_LEFT:
                 self.prevstate = IDLE_LEFT
                 self.speedx = 0
             else:
