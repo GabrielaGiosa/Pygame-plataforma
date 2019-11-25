@@ -12,6 +12,7 @@ FPS = 60 # Frames por segundo
 TELA_INICIAL = 4
 TELA_AJUDA = 5
 GAME_SCREEN = 1
+QUIT = 0
 # Define algumas variaveis com as cores basicas
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -53,6 +54,9 @@ def tela_inicial(screen):
         
         # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:       
+                if event.key == pygame.K_q:
+                    return QUIT
             # Verifica se foi fechado.
             pos = pygame.mouse.get_pos()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -84,6 +88,9 @@ def tela_ajuda(screen):
         
         # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:       
+                if event.key == pygame.K_q:
+                    return QUIT
             # Verifica se foi fechado.
             pos = pygame.mouse.get_pos()
             if event.type == pygame.MOUSEBUTTONDOWN:

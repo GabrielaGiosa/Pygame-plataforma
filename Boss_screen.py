@@ -809,6 +809,9 @@ def boss_screen(screen):
             # Verifica se foi fechado.
             if event.type == pygame.QUIT:
                 return QUIT
+            if event.type == pygame.KEYDOWN:       
+                if event.key == pygame.K_q:
+                    return QUIT
                 
             # Verifica se pulou
             if event.type == pygame.KEYDOWN:                
