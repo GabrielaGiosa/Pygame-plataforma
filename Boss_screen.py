@@ -748,7 +748,7 @@ def lobosster():
     x =  (WIDTH - 160)
     y = (HEIGHT * 0.14)
     name_boss.set_colorkey(BLACK)
-    screen.blit(name_boss, (x,y))
+#    screen.blit(name_boss, (x,y))
 
 # Comando para evitar travamentos.
 def boss_screen(screen):
@@ -970,10 +970,10 @@ def game_over(screen, tela_anterior):
                     return tela_anterior
                 elif pos[0] > 890 and pos[0] < 1110 and pos[1] > 35 and pos[1] < 180:
                     return QUIT
-
+"""
 try:
     tela_anterior = -1
-    tela_atual = BOSS_SCREEN
+    tela_atual = TELA_AJUDA
     while tela_atual != QUIT:
         if tela_atual == BOSS_SCREEN:
             tela_anterior = tela_atual
@@ -982,3 +982,5 @@ try:
             tela_atual = game_over(screen, tela_anterior)
 finally:
     pygame.quit()
+"""
+

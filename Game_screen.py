@@ -1,6 +1,8 @@
-# Importando as bibliotecas necessárias.
-import pygame, time, math, random
+# Importando as bibliotecas necessÃ¡rias.
+# -*- coding: utf-8 -*-
+import pygame, math, random
 from os import path
+from Boss_screen import boss_screen
 #from pygame_functions import *
 
 # Estabelece a pasta que contem as figuras.
@@ -11,12 +13,12 @@ snd_dir = path.join(path.dirname(__file__), 'sons_rep')
 # Dados gerais do jogo.
 WIDTH = 1300 # Largura da tela
 HEIGHT = 700 # Altura da tela
-TILE_SIZE = 40 # Tamanho de cada tile (cada tile é um quadrado)
+TILE_SIZE = 40 # Tamanho de cada tile (cada tile eh um quadrado)
 PLAYER_WIDTH = TILE_SIZE
 PLAYER_HEIGHT = int(TILE_SIZE * 1.5)
 FPS = 60 # Frames por segundo
 
-# Define algumas variáveis com as cores básicas
+# Define algumas variaveis com as cores basicas
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -24,14 +26,14 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
-# Define a aceleração da gravidade
+# Define a aceleracao da gravidade
 GRAVITY = 1.5
 # Define a velocidade inicial no pulo
 JUMP_SIZE = 25
-# Define a altura do chão
+# Define a altura do chao
 GROUND = HEIGHT * 5 // 6
 
-# Define ações do player
+# Define acoes do player
 IDLE = 0
 RIGHT = 1
 LEFT = 2
@@ -45,7 +47,7 @@ ICED_LEFT = 9
 POS = [IDLE, RIGHT, JUMP, FALL, ICED]
 NEG = [LEFT, JUMP_LEFT, FALL_LEFT, IDLE_LEFT, ICED_LEFT]
 
-# Define ações do mob
+# Define acoes do mob
 ATTACK = 8
 DEAD = 9
 
@@ -58,6 +60,8 @@ QUIT = 0
 GAME_SCREEN = 1
 BOSS_SCREEN = 2
 GAME_OVER = 3
+TELA_INICIAL = 4
+TELA_AJUDA = 5
 
 # Define o mapa com os tipos de tiles
 MAP1 = [   
@@ -127,7 +131,7 @@ class HealthBar(pygame.sprite.Sprite):
         self.image = self.healthsheet[self.frame]
 
 
-# Class que representa os blocos do cenário
+# Class que representa os blocos do cenÃ¡rio
 class Tile(pygame.sprite.Sprite):
     
     # Construtor da classe.
@@ -171,7 +175,7 @@ class Health(pygame.sprite.Sprite):
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
         
-        # Guarda o grupo de blocos para tratar as colisões
+        # Guarda o grupo de blocos para tratar as colisÃµes
         self.blocks = blocks
         
         # Sorteia um lugar inicial em x
@@ -187,7 +191,7 @@ class Health(pygame.sprite.Sprite):
         self.speedy += GRAVITY
         self.rect.y += GRAVITY
         
-        # Corrige a posição do personagem para antes da colisão
+        # Corrige a posiÃ§Ã£o do personagem para antes da colisÃ£o
         collisions = pygame.sprite.spritecollide(self, self.blocks, False)
         for collision in collisions:
             # Estava indo para baixo
@@ -275,21 +279,21 @@ class Player(pygame.sprite.Sprite):
                            ICED_LEFT:spritesheet[43:44]} 
         
         
-        # Define estado atual (que define qual animação deve ser mostrada)
+        # Define estado atual (que define qual animaÃ§Ã£o deve ser mostrada)
         self.state = IDLE
-        # Define animação atual
+        # Define animaÃ§Ã£o atual
         self.animation = self.animations[self.state]
-        # Inicializa o primeiro quadro da animação
+        # Inicializa o primeiro quadro da animaÃ§Ã£o
         self.frame = 0
         self.image = self.animation[self.frame]
         
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
         
-        # Guarda o grupo de blocos para tratar as colisões
+        # Guarda o grupo de blocos para tratar as colisÃµes
         self.blocks = blocks
         
-        # Define posição inicial.
+        # Define posiÃ§Ã£o inicial.
         self.rect.x = row * TILE_SIZE - 750
         self.rect.bottom = column * TILE_SIZE + 750
         
@@ -301,7 +305,7 @@ class Player(pygame.sprite.Sprite):
         # Guarda o tick da primeira imagem
         self.last_update = pygame.time.get_ticks()
 
-        # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
+        # Controle de ticks de animaÃ§Ã£o: troca de imagem a cada self.frame_ticks milissegundos.
         self.frame_ticks = 100
         self.freeze_ticks = 1500
         self.startfreeze_ticks = 0
@@ -326,7 +330,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.animation[self.frame]
         self.startfreeze_ticks = pygame.time.get_ticks()
         
-    # Metodo que atualiza a posição de Jack
+    # Metodo que atualiza a posiÃ§Ã£o de Jack
     def update(self):
         # Vamos tratar os movimentos de maneira independente.
         # Primeiro tentamos andar no eixo y e depois no x.
@@ -341,25 +345,25 @@ class Player(pygame.sprite.Sprite):
                 
             
             
-        # Verifica quantos ticks se passaram desde a ultima mudança de frame.
+        # Verifica quantos ticks se passaram desde a ultima mudanÃ§a de frame.
         elapsed_ticks = now - self.last_update
 
-        # Se já está na hora de mudar de imagem...
+        # Se jÃ¡ estÃ¡ na hora de mudar de imagem...
         if elapsed_ticks > self.frame_ticks:
 
             # Marca o tick da nova imagem.
             self.last_update = now
             
-            # Avança um quadro.
+            # AvanÃ§a um quadro.
             self.frame += 1
         
-            # Atualiza animação atual
+            # Atualiza animaÃ§Ã£o atual
             self.animation = self.animations[self.state]
-            # Reinicia a animação caso o índice da imagem atual seja inválido
+            # Reinicia a animaÃ§Ã£o caso o Ã­ndice da imagem atual seja invÃ¡lido
             if self.frame >= len(self.animation):
                 self.frame = 0
             
-            # Armazena a posição do centro da imagem
+            # Armazena a posiÃ§Ã£o do centro da imagem
             center = self.rect.center
             # Atualiza imagem atual
             self.image = self.animation[self.frame]
@@ -368,13 +372,13 @@ class Player(pygame.sprite.Sprite):
             self.rect.center = center
             self.mask = pygame.mask.from_surface(self.image)
         # Tenta andar em y
-        # Atualiza a velocidade aplicando a aceleração da gravidade
+        # Atualiza a velocidade aplicando a aceleraÃ§Ã£o da gravidade
         self.speedy += GRAVITY
-        # Atualiza a posição y
+        # Atualiza a posiÃ§Ã£o y
         self.rect.y += self.speedy
 
         
-        # Se colidiu com algum bloco, volta para o ponto antes da colisão
+        # Se colidiu com algum bloco, volta para o ponto antes da colisÃ£o
         collisions = pygame.sprite.spritecollide(self, self.blocks, False)
         # Atualiza o estado para caindo
         if self.speedy > 0 and self.state == JUMP:
@@ -382,7 +386,7 @@ class Player(pygame.sprite.Sprite):
         elif self.speedy > 0 and self.state == JUMP_LEFT:
             self.state = FALL_LEFT
 
-        # Corrige a posição do personagem para antes da colisão
+        # Corrige a posiÃ§Ã£o do personagem para antes da colisÃ£o
         for collision in collisions:
             # Estava indo para baixo
             if self.speedy > 0:
@@ -408,9 +412,9 @@ class Player(pygame.sprite.Sprite):
                 
                
         if self.state == IDLE or self.state == IDLE_LEFT:
-            # Define variável para caminhar
+            # Define variÃ¡vel para caminhar
             keys = pygame.key.get_pressed()    
-            # Verifica se está segurando alguma tela
+            # Verifica se estÃ¡ segurando alguma tela
             if keys[pygame.K_RIGHT] == True and keys[pygame.K_LEFT] == False:
                 self.state = RIGHT
             elif keys[pygame.K_LEFT] == True and keys[pygame.K_RIGHT] == False:
@@ -419,14 +423,14 @@ class Player(pygame.sprite.Sprite):
 
         # Tenta andar em x
         self.rect.x += self.speedx
-        # Corrige a posição caso tenha passado do tamanho da janela
+        # Corrige a posiÃ§Ã£o caso tenha passado do tamanho da janela
         if self.rect.left < 0:
             self.rect.left = 0
         elif self.rect.right >= WIDTH:
             self.rect.right = WIDTH - 1
-        # Se colidiu com algum bloco, volta para o ponto antes da colisão
+        # Se colidiu com algum bloco, volta para o ponto antes da colisÃ£o
         collisions = pygame.sprite.spritecollide(self, self.blocks, False)
-        # Corrige a posição do personagem para antes da colisão
+        # Corrige a posiÃ§Ã£o do personagem para antes da colisÃ£o
         for collision in collisions:
             # Estava indo para a direita
             if self.speedx > 0:
@@ -435,9 +439,9 @@ class Player(pygame.sprite.Sprite):
             elif self.speedx < 0:
                 self.rect.left = collision.rect.right
 
-    # Método que faz o personagem pular
+    # MÃ©todo que faz o personagem pular
     def jump(self):               
-        # Só pode pular se ainda não estiver pulando ou caindo
+        # SÃ³ pode pular se ainda nÃ£o estiver pulando ou caindo
         if self.speedy != 0:
             self.state = JUMP            
         elif self.state == IDLE or self.state == RIGHT:
@@ -469,10 +473,10 @@ class Bullet(pygame.sprite.Sprite):
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
         
-        # Guarda o grupo de blocos para tratar as colisões
+        # Guarda o grupo de blocos para tratar as colisÃµes
         self.blocks = blocks
         
-        # Guarda o grupo de blocos para tratar as colisões
+        # Guarda o grupo de blocos para tratar as colisÃµes
         self.mob = mob
         
         # Coloca no lugar inicial definido em x, y do constutor
@@ -485,7 +489,7 @@ class Bullet(pygame.sprite.Sprite):
             self.rect.centerx = x-10
             self.speedx = -20
 
-    # Metodo que atualiza a posição da bala
+    # Metodo que atualiza a posiÃ§Ã£o da bala
     def update(self):
         self.rect.x += self.speedx
         self.mask = pygame.mask.from_surface(self.image)
@@ -496,7 +500,7 @@ class Bullet(pygame.sprite.Sprite):
         
         # Se colidiu com algum bloco, morre
         collisions = pygame.sprite.spritecollide(self, self.blocks, False)
-        # Corrige a posição do personagem para antes da colisão
+        # Corrige a posiÃ§Ã£o do personagem para antes da colisÃ£o
         if len(collisions) > 0:
             self.kill()
 
@@ -557,12 +561,12 @@ class Mob(pygame.sprite.Sprite):
         
         self.morre = False
         self.state = ATTACK 
-        # Define estado atual (que define qual animação deve ser mostrada)
+        # Define estado atual (que define qual animaÃ§Ã£o deve ser mostrada)
         if self.state == ATTACK:
             
-        # Define animação atual
+        # Define animaÃ§Ã£o atual
             self.animation = self.animations[self.state]
-            # Inicializa o primeiro quadro da animação
+            # Inicializa o primeiro quadro da animaÃ§Ã£o
             self.frame = 0
             self.image = self.animation[self.frame]
             
@@ -571,9 +575,9 @@ class Mob(pygame.sprite.Sprite):
             
         if self.state == DEAD:
             
-        # Define animação atual
+        # Define animaÃ§Ã£o atual
             self.animation = self.animations[self.state]
-            # Inicializa o primeiro quadro da animação
+            # Inicializa o primeiro quadro da animaÃ§Ã£o
             self.frame = 0
             self.image = self.animation[self.frame]
             
@@ -581,10 +585,10 @@ class Mob(pygame.sprite.Sprite):
             # Detalhes sobre o posicionamento.
             self.rect = self.image.get_rect()
     
-        # Guarda o grupo de blocos para tratar as colisões
+        # Guarda o grupo de blocos para tratar as colisÃµes
         self.blocks = blocks
         self.fire = fire
-        self.vida = 10
+        self.vida = 1
         # Coloca no lugar inicial definido em x, y do constutor
         self.rect.bottom = y
         self.rect.centerx = x
@@ -594,10 +598,10 @@ class Mob(pygame.sprite.Sprite):
         # Guarda o tick da primeira imagem
         self.last_update = pygame.time.get_ticks()
 
-        # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
+        # Controle de ticks de animaÃ§Ã£o: troca de imagem a cada self.frame_ticks milissegundos.
         self.frame_ticks = 100
         
-    # Metodo que atualiza a posição de mob
+    # Metodo que atualiza a posiÃ§Ã£o de mob
     def update(self):
         # Vamos tratar os movimentos de maneira independente.
         # Primeiro tentamos andar no eixo y e depois no x.
@@ -605,14 +609,14 @@ class Mob(pygame.sprite.Sprite):
         # Verifica o tick atual.
         now = pygame.time.get_ticks()
 
-        # Verifica quantos ticks se passaram desde a ultima mudança de frame.
+        # Verifica quantos ticks se passaram desde a ultima mudanÃ§a de frame.
         elapsed_ticks = now - self.last_update
 
         if self.state == DEAD and self.frame == 4:
             self.morre = True
 
 
-        # Se já está na hora de mudar de imagem...
+        # Se jÃ¡ estÃ¡ na hora de mudar de imagem...
         if elapsed_ticks > self.frame_ticks:
             if self.frame == 24:
                 self.fire = True
@@ -622,16 +626,16 @@ class Mob(pygame.sprite.Sprite):
             # Marca o tick da nova imagem.
             self.last_update = now
             
-            # Avança um quadro.
+            # AvanÃ§a um quadro.
             self.frame += 1
         
-            # Atualiza animação atual
+            # Atualiza animaÃ§Ã£o atual
             self.animation = self.animations[self.state]
-            # Reinicia a animação caso o índice da imagem atual seja inválido
+            # Reinicia a animaÃ§Ã£o caso o Ã­ndice da imagem atual seja invÃ¡lido
             if self.frame >= len(self.animation):
                 self.frame = 0
             
-            # Armazena a posição do centro da imagem
+            # Armazena a posiÃ§Ã£o do centro da imagem
             center = self.rect.center
             # Atualiza imagem atual
             self.image = self.animation[self.frame]
@@ -642,15 +646,15 @@ class Mob(pygame.sprite.Sprite):
             self.mask = pygame.mask.from_surface(self.image)
             
         # Tenta andar em y
-        # Atualiza a velocidade aplicando a aceleração da gravidade
+        # Atualiza a velocidade aplicando a aceleraÃ§Ã£o da gravidade
         self.speedy += GRAVITY
-        # Atualiza a posição y
+        # Atualiza a posiÃ§Ã£o y
         self.rect.y += self.speedy
         
-        # Se colidiu com algum bloco, volta para o ponto antes da colisão
+        # Se colidiu com algum bloco, volta para o ponto antes da colisÃ£o
         collisions = pygame.sprite.spritecollide(self, self.blocks, False)
 
-        # Corrige a posição do personagem para antes da colisão
+        # Corrige a posiÃ§Ã£o do personagem para antes da colisÃ£o
         for collision in collisions:
             # Estava indo para baixo
             if self.speedy > 0:
@@ -693,7 +697,7 @@ class Arrow(pygame.sprite.Sprite):
         self.speedx = speedx
         self.speedy = speedy
 
-    # Metodo que atualiza a posição da bala
+    # Metodo que atualiza a posiÃ§Ã£o da bala
     def update(self):
         self.cx += self.speedx
         self.cy += self.speedy
@@ -745,11 +749,11 @@ class Magician(pygame.sprite.Sprite):
         self.animations = {ATTACK:spritesheetmag[0:22]}
         
         
-        # Define estado atual (que define qual animação deve ser mostrada)
+        # Define estado atual (que define qual animaÃ§Ã£o deve ser mostrada)
         self.state = ATTACK
-        # Define animação atual
+        # Define animaÃ§Ã£o atual
         self.animation = self.animations[self.state]
-        # Inicializa o primeiro quadro da animação
+        # Inicializa o primeiro quadro da animaÃ§Ã£o
         self.frame = 0
         self.image = self.animation[self.frame]
         self.vida = 10
@@ -757,7 +761,7 @@ class Magician(pygame.sprite.Sprite):
         # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
         
-        # Guarda o grupo de blocos para tratar as colisões
+        # Guarda o grupo de blocos para tratar as colisÃµes
         self.blocks = blocks
         self.fire = fire
         
@@ -770,10 +774,10 @@ class Magician(pygame.sprite.Sprite):
         # Guarda o tick da primeira imagem
         self.last_update = pygame.time.get_ticks()
 
-        # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
+        # Controle de ticks de animaÃ§Ã£o: troca de imagem a cada self.frame_ticks milissegundos.
         self.frame_ticks = 100
         
-    # Metodo que atualiza a posição dos Magos 
+    # Metodo que atualiza a posiÃ§Ã£o dos Magos 
     def update(self):
         # Vamos tratar os movimentos de maneira independente.
         # Primeiro tentamos andar no eixo y e depois no x.
@@ -781,10 +785,10 @@ class Magician(pygame.sprite.Sprite):
         # Verifica o tick atual.
         now = pygame.time.get_ticks()
 
-        # Verifica quantos ticks se passaram desde a ultima mudança de frame.
+        # Verifica quantos ticks se passaram desde a ultima mudanÃ§a de frame.
         elapsed_ticks = now - self.last_update
 
-        # Se já está na hora de mudar de imagem...
+        # Se jÃ¡ estÃ¡ na hora de mudar de imagem...
         if elapsed_ticks > self.frame_ticks:
             if self.frame == 21:
                 self.fire = True
@@ -794,16 +798,16 @@ class Magician(pygame.sprite.Sprite):
             # Marca o tick da nova imagem.
             self.last_update = now
             
-            # Avança um quadro.
+            # AvanÃ§a um quadro.
             self.frame += 1
         
-            # Atualiza animação atual
+            # Atualiza animaÃ§Ã£o atual
             self.animation = self.animations[self.state]
-            # Reinicia a animação caso o índice da imagem atual seja inválido
+            # Reinicia a animaÃ§Ã£o caso o Ã­ndice da imagem atual seja invÃ¡lido
             if self.frame >= len(self.animation):
                 self.frame = 0
             
-            # Armazena a posição do centro da imagem
+            # Armazena a posiÃ§Ã£o do centro da imagem
             center = self.rect.center
             # Atualiza imagem atual
             self.image = self.animation[self.frame]
@@ -814,15 +818,15 @@ class Magician(pygame.sprite.Sprite):
             self.mask = pygame.mask.from_surface(self.image)
             
         # Tenta andar em y
-        # Atualiza a velocidade aplicando a aceleração da gravidade
+        # Atualiza a velocidade aplicando a aceleraÃ§Ã£o da gravidade
         self.speedy += GRAVITY
-        # Atualiza a posição y
+        # Atualiza a posiÃ§Ã£o y
         self.rect.y += self.speedy
         
-        # Se colidiu com algum bloco, volta para o ponto antes da colisão
+        # Se colidiu com algum bloco, volta para o ponto antes da colisÃ£o
         collisions = pygame.sprite.spritecollide(self, self.blocks, False)
 
-        # Corrige a posição do personagem para antes da colisão
+        # Corrige a posiÃ§Ã£o do personagem para antes da colisÃ£o
         for collision in collisions:
             # Estava indo para baixo
             if self.speedy > 0:
@@ -866,7 +870,7 @@ class Ice(pygame.sprite.Sprite):
         self.speedy = speedy
 
 
-    # Metodo que atualiza a posição da bala
+    # Metodo que atualiza a posiÃ§Ã£o da bala
     def update(self):
         self.cx += self.speedx
         self.cy += self.speedy
@@ -877,7 +881,7 @@ class Ice(pygame.sprite.Sprite):
         if self.rect.x > 1300 or self.rect.x < 0:
             self.kill()
 
-# Inicialização do Pygame.
+# InicializaÃ§Ã£o do Pygame.
 pygame.init()
 pygame.mixer.init()
 
@@ -887,7 +891,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT),pygame.FULLSCREEN)
 # Nome do jogo
 pygame.display.set_caption("Tales of Jack")
 
-# Variável para o ajuste de velocidade
+# VariÃ¡vel para o ajuste de velocidade
 clock = pygame.time.Clock()
 
 # Carrega o fundo do jogo
@@ -933,6 +937,7 @@ class Door(pygame.sprite.Sprite):
         self.rect.y = 604
 doors = pygame.sprite.Group()
 
+
 def fade(WIDTH, HEIGHT): 
     door_sound.play()
     fade = pygame.Surface((WIDTH, HEIGHT))
@@ -970,17 +975,17 @@ def game_screen(screen):
     door = Door()
     running = True
     pygame.mixer.music.play(loops=-1)
-    # Sprites de block são aqueles que impedem o movimento do jogador
+    # Sprites de block sÃ£o aqueles que impedem o movimento do jogador
     blocks = pygame.sprite.Group()
     
 
     row = len(MAP1)
     column = len(MAP1[0])
 
-    # Cria Jack. O construtor será chamado automaticamente.
+    # Cria Jack. O construtor serÃ¡ chamado automaticamente.
     player = Player(row, column, blocks)
     
-    # Cria barra de vida. O construtor será chamado automaticamente.
+    # Cria barra de vida. O construtor serÃ¡ chamado automaticamente.
     healthbar = HealthBar()
     
     
@@ -999,7 +1004,7 @@ def game_screen(screen):
                 all_sprites.add(tile)
                 blocks.add(tile)
                 
-    # Cria um grupo só de esqueletos
+    # Cria um grupo sÃ³ de esqueletos
     mob = pygame.sprite.Group()
     
     #Cria um grupo so para magos 
@@ -1035,7 +1040,7 @@ def game_screen(screen):
     #Cria um grupo so para icehits
     ices = pygame.sprite.Group()     
     
-    # Cria um grupo só de itens health
+    # Cria um grupo sÃ³ de itens health
     healths = pygame.sprite.Group()
     while running:
         
@@ -1087,7 +1092,7 @@ def game_screen(screen):
                 
                 
                 
-        # Processa os eventos (mouse, teclado, botão, etc).
+        # Processa os eventos (mouse, teclado, botÃ£o, etc).
         for event in pygame.event.get():
             
             # Verifica se foi fechado.
@@ -1113,7 +1118,7 @@ def game_screen(screen):
                     elif event.key == pygame.K_RIGHT:
                         player.speedx = 5
                         player.state = RIGHT
-                    # Se for um espaço atira!
+                    # Se for um espaÃ§o atira!
                     if event.key == pygame.K_SPACE:
                         bullet = Bullet(player.rect.centerx, player.rect.top, blocks, mob, player)
                         all_sprites.add(bullet)
@@ -1144,7 +1149,7 @@ def game_screen(screen):
             healths.add(health)
             last_heal = now_heal
         
-        # Verifica se houve colisão entre tiro e meteoro
+        # Verifica se houve colisÃ£o entre tiro e meteoro
         hits = pygame.sprite.groupcollide(mob, bullets, False, True, pygame.sprite.collide_mask)
         for m in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
@@ -1157,7 +1162,7 @@ def game_screen(screen):
             if m.morre == True:
                 m.kill()
                 
-        # Verifica se houve colisão entre tiro e meteoro
+        # Verifica se houve colisÃ£o entre tiro e meteoro
         hits = pygame.sprite.groupcollide(mag, bullets, False, True, pygame.sprite.collide_mask)
         for mg in hits: # Pode haver mais de um
             # O meteoro e destruido e precisa ser recriado
@@ -1191,10 +1196,10 @@ def game_screen(screen):
                 vida == 5
             heal_sound.play()
             
-        hits = pygame.sprite.spritecollide(player, doors, False, pygame.sprite.collide_mask) 
+        hits = pygame.sprite.spritecollide(player, doors, True, pygame.sprite.collide_mask) 
         for hit in hits: #Pode haver mais de um 
             fade(WIDTH, HEIGHT)
-            return QUIT
+            return BOSS_SCREEN
             
         # Verifica se caiu da tela
         if player.rect.y > 700 or vida == 0:
@@ -1233,13 +1238,77 @@ def game_over(screen, tela_anterior):
                 elif pos[0] > 890 and pos[0] < 1110 and pos[1] > 35 and pos[1] < 180:
                     return QUIT
 
+def tela_inicial(screen):
+    background = pygame.image.load(path.join(img_dir, 'init.png')).convert()
+    background_rect = background.get_rect()
+    
+    running = True
+    
+    while running:
+        
+        # Ajusta a velocidade do jogo.
+        clock.tick(FPS)
+        
+        # Processa os eventos (mouse, teclado, botão, etc).
+        for event in pygame.event.get():
+            # Verifica se foi fechado.
+            pos = pygame.mouse.get_pos()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if pos[0] > 70 and pos[0] < 500 and pos[1] > 400 and pos[1] < 600:
+                    return GAME_SCREEN
+                elif pos[0] > 755 and pos[0] < 1200 and pos[1] > 400 and pos[1] < 600:
+                    return TELA_AJUDA
+                
+        screen.fill(BLACK)
+        screen.blit(background, background_rect)
+
+        # Depois de desenhar tudo, inverte o display.
+        pygame.display.flip()
+        
+        
+def tela_ajuda(screen):
+    background = pygame.image.load(path.join(img_dir, 'ajuda.png')).convert()
+    background_rect = background.get_rect()
+    
+    running = True
+    
+    while running:
+        
+        # Ajusta a velocidade do jogo.
+        clock.tick(FPS)
+        
+        # Processa os eventos (mouse, teclado, botão, etc).
+        for event in pygame.event.get():
+            # Verifica se foi fechado.
+            pos = pygame.mouse.get_pos()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if pos[0] > 1000 and pos[0] < 1300 and pos[1] > 580 and pos[1] < 700:
+                    return TELA_INICIAL
+                
+        screen.fill(BLACK)
+        screen.blit(background, background_rect)
+
+        # Depois de desenhar tudo, inverte o display.
+        pygame.display.flip()
+
+
+
+
+
 try:
     tela_anterior = -1
-    tela_atual = GAME_SCREEN
+    tela_atual = TELA_INICIAL
     while tela_atual != QUIT:
         if tela_atual == GAME_SCREEN:
             tela_anterior = tela_atual
-            tela_atual = game_screen(screen)         
+            tela_atual = game_screen(screen)
+            
+        elif tela_atual == TELA_INICIAL:
+            tela_atual = tela_inicial(screen)
+        elif tela_atual == TELA_AJUDA:
+            tela_atual = tela_ajuda(screen)
+        elif tela_atual == BOSS_SCREEN:
+            tela_atual = boss_screen(screen)
         elif tela_atual == GAME_OVER:
             tela_atual = game_over(screen, tela_anterior)
         
